@@ -116,5 +116,16 @@ def main():
     else:
         pass
 
+    try:
+        FRONTEND.run(port=config.get('options', 'port'), host=config.get('options', 'host'))
+    except ConfigParser.NoSectionError:
+        traceback.print_exc()
+        sys.exit("Aborting. Missing section in config file")
+    except ConfigParser.NoOptionError:
+        traceback.print_exc()
+        sys.exit("Aborting. Missing option in config file")
+    else:
+        pass
+
 if __name__ == '__main__':
     main()
