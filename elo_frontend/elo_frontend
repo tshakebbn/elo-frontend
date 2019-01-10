@@ -68,6 +68,17 @@ def index():
 
     return flask.render_template('landing.html')
 
+@FRONTEND.route('/login.html')
+def login():
+    """Login page
+
+    Returns:
+        displays login page
+
+    """
+
+    return flask.render_template('login.html')
+
 def setup_argparser():
     """ Creates Elo Frontend argument parser
 
