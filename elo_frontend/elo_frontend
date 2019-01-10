@@ -79,6 +79,61 @@ def login():
 
     return flask.render_template('login.html')
 
+@FRONTEND.route('/mk.html')
+def mk_home():
+    """Mario Kart home page
+
+    Returns:
+        displays Mario Kart home page
+
+    """
+
+    return flask.render_template('mk.html')
+
+@FRONTEND.route('/mp.html')
+def mp_home():
+    """Mario Party home page
+
+    Returns:
+        displays Mario Party home page
+
+    """
+
+    return flask.render_template('mp.html')
+
+@FRONTEND.route('/ss.html')
+def ss_home():
+    """Super Smash home page
+
+    Returns:
+        displays Super Smash home page
+
+    """
+
+    return flask.render_template('ss.html')
+
+@FRONTEND.route('/pp.html')
+def pp_home():
+    """Ping Pong home page
+
+    Returns:
+        displays Ping Pong home page
+
+    """
+
+    return flask.render_template('pp.html')
+
+@FRONTEND.route('/fb.html')
+def fb_home():
+    """Foosball home page
+
+    Returns:
+        displays Foosball home page
+
+    """
+
+    return flask.render_template('fb.html')
+
 def setup_argparser():
     """ Creates Elo Frontend argument parser
 
