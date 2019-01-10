@@ -1,0 +1,120 @@
+#!/usr/bin/python
+"""Elo Frontend
+
+This script will deploy a flask webserver to host the elo server frontend. This dashboard will
+display information and functionality for the user.
+
+@file elo_frontend
+
+@author Tyler Shake
+
+@par Notifications:
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The below copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+@copyright Copyright 2019 Tyler Shake
+
+"""
+
+import os
+import traceback
+import sys
+import argparse
+import ConfigParser
+import flask
+import pkg_resources
+import appdirs
+
+FRONTEND = flask.Flask(
+    __name__,
+    static_folder=pkg_resources.resource_filename('elo_frontend', 'static'),
+    template_folder=pkg_resources.resource_filename('elo_frontend', 'templates'))
+
+@FRONTEND.route('/')
+def index_redirect():
+    """Main entrypoint to webpage
+
+    Returns:
+        displays landing page
+
+    """
+
+    return flask.render_template('landing.html')
+
+@FRONTEND.route('/index.html')
+def index():
+    """Landing page
+
+    Returns:
+        displays landing page
+
+    """
+
+    return flask.render_template('landing.html')
+
+def setup_argparser():
+    """ Creates Elo Frontend argument parser
+
+    Returns:
+        parser (obj):	argparse object
+
+    """
+
+    version = pkg_resources.require('elo_frontend')[0].version
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--version", action="version",
+                        version="Elo Frontend " + str(version))
+    return parser
+
+def setup_config():
+    """ Setup config file
+
+    Returns:
+        config (obj):   ConfigParser object
+
+    """
+
+    config = ConfigParser.RawConfigParser()
+    config_directory = appdirs.user_config_dir('elo_frontend')
+    config_file = os.path.join(config_directory, 'elo_frontend.conf')
+    if not os.path.isfile(config_file):
+        source = pkg_resources.resource_stream('config', 'elo_frontend.conf')
+        if not os.path.isdir(config_directory):
+            os.makedirs(config_directory)
+        with open(config_file, 'w') as destination:
+            destination.writelines(source)
+    config.read(config_file)
+    return config
+
+def main():
+    """Main function if ran standalone"""
+
+    args = setup_argparser().parse_args()
+
+    try:
+        # get config file arguments
+        config = setup_config()
+    except IOError:
+        traceback.print_exc()
+        sys.exit("Aborting. Unable to find config file")
+    else:
+        pass
+
+if __name__ == '__main__':
+    main()

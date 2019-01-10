@@ -1,0 +1,3 @@
+include config/elo_frontend.conf
+recursive-include elo_frontend/templates *
+recursive-include elo_frontend/static *
