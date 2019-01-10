@@ -8,17 +8,17 @@
       <div class="logo">
         <a href="http://www.creative-tim.com" class="simple-text logo-mini">
           <div class="logo-image-small">
-            <img src="{{ url_for('static', filename='img/logo-small.png') }}">
+            <img src="{{ url_for('static', filename='img/bbn-logo-small.png') }}">
           </div>
         </a>
-        <a href="http://www.creative-tim.com" class="simple-text logo-normal">
-          Creative Tim
+        <a href="{{ url_for('index.html') }}" class="simple-text logo-normal">
+          BBN Elo
         </a>
       </div>
       <div class="sidebar-wrapper">
         <ul class="nav">
           <li class="active ">
-            <a href="./dashboard.html">
+            <a href="{ url_for('pp.html') }}">
               <i class="nc-icon nc-bank"></i>
               <p>Dashboard</p>
             </a>
