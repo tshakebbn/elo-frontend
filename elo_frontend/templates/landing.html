@@ -3,45 +3,23 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-transparent" color-on-scroll="300">
         <div class="container">
 			<div class="navbar-translate">
-				<a class="navbar-brand" href="https://www.creative-tim.com">Paper Kit 2</a>
-	            <button class="navbar-toggler navbar-toggler-right navbar-burger" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-bar"></span>
-					<span class="navbar-toggler-bar"></span>
-					<span class="navbar-toggler-bar"></span>
-	            </button>
+				<a class="navbar-brand" href="https://www.creative-tim.com">BBN Technologies</a>
 			</div>
 	        <div class="collapse navbar-collapse" id="navbarToggler">
 	            <ul class="navbar-nav ml-auto">
-					<li class="nav-item">
-	                    <a href="../index.html" class="nav-link"><i class="nc-icon nc-layout-11"></i>Components</a>
-	                </li>
-	                <li class="nav-item">
-	                    <a href="../documentation/tutorial-components.html" target="_blank" class="nav-link"><i class="nc-icon nc-book-bookmark"></i>  Documentation</a>
-	                </li>
-					<li class="nav-item">
-                        <a class="nav-link" rel="tooltip" title="Follow us on Twitter" data-placement="bottom" href="https://twitter.com/CreativeTim" target="_blank">
-                            <i class="fa fa-twitter"></i>
-                            <p class="d-lg-none">Twitter</p>
-                        </a>
-                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" rel="tooltip" title="Like us on Facebook" data-placement="bottom" href="https://www.facebook.com/CreativeTim" target="_blank">
-                            <i class="fa fa-facebook-square"></i>
-                            <p class="d-lg-none">Facebook</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" rel="tooltip" title="Follow us on Instagram" data-placement="bottom" href="https://www.instagram.com/CreativeTimOfficial" target="_blank">
-                            <i class="fa fa-instagram"></i>
-                            <p class="d-lg-none">Instagram</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" rel="tooltip" title="Star on GitHub" data-placement="bottom" href="https://www.github.com/CreativeTimOfficial" target="_blank">
+                        <a class="nav-link" rel="tooltip" title="Star on GitHub" data-placement="bottom" href="https://github.com/tshakebbn/elo-frontend" target="_blank">
                             <i class="fa fa-github"></i>
                             <p class="d-lg-none">GitHub</p>
                         </a>
                     </li>
+	                <li class="nav-item">
+	                    <a href="#" target="_blank" class="nav-link"><i class="nc-icon nc-book-bookmark"></i>  Documentation</a>
+	                </li>
+                    <li class="nav-item">
+                        <a href="#" target="_blank" class="nav-link"><i class="fa fa-user-circle" aria-hidden="true"></i>  Login</a>
+                    </li>
+
 	            </ul>
 	        </div>
 		</div>
@@ -51,11 +29,10 @@
 			<div class="filter"></div>
 			<div class="container">
 			    <div class="motto text-center">
-			        <h1>Example page</h1>
-			        <h3>Start designing your landing page here.</h3>
+			        <h1>BBN Elo Server</h1>
+			        <h3>Player rankings for every game.</h3>
 			        <br />
 			        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="btn btn-outline-neutral btn-round"><i class="fa fa-play"></i>Watch video</a>
-			        <button type="button" class="btn btn-outline-neutral btn-round">Download</button>
 			    </div>
 			</div>
     	</div>
@@ -63,65 +40,18 @@
 			<div class="section text-center">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-8 ml-auto mr-auto">
-                        <h2 class="title">Let's talk product</h2>
-                        <h5 class="description">This is the paragraph where you can write more details about your product. Keep you user engaged by providing meaningful information. Remember that by this time, the user is curious, otherwise he wouldn't scroll to get here. Add a button if you want the user to see more.</h5>
+                    <div class="col-md-6">
+                        <h2 class="title">Mario Kart</h2>
+                        <h5 class="description">Mario Kart description paragraph</h5>
                         <br>
-                        <a href="#paper-kit" class="btn btn-danger btn-round">See Details</a>
+                        <button class="btn btn-danger btn-round btn-lg">
+                            View Dashboard
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <img src="{{ url_for('static', filename='img/mk.jpg') }}" class="img-fluid" alt="Responsive image">
                     </div>
                 </div>
-				<br/><br/>
-				<div class="row">
-					<div class="col-md-3">
-						<div class="info">
-							<div class="icon icon-danger">
-								<i class="nc-icon nc-album-2"></i>
-							</div>
-							<div class="description">
-								<h4 class="info-title">Beautiful Gallery</h4>
-								<p class="description">Spend your time generating new ideas. You don't have to think of implementing.</p>
-								<a href="#pkp" class="btn btn-link btn-danger">See more</a>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="info">
-							<div class="icon icon-danger">
-								<i class="nc-icon nc-bulb-63"></i>
-							</div>
-							<div class="description">
-								<h4 class="info-title">New Ideas</h4>
-								<p>Larger, yet dramatically thinner. More powerful, but remarkably power efficient.</p>
-								<a href="#pkp" class="btn btn-link btn-danger">See more</a>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="info">
-							<div class="icon icon-danger">
-								<i class="nc-icon nc-chart-bar-32"></i>
-							</div>
-							<div class="description">
-								<h4 class="info-title">Statistics</h4>
-								<p>Choose from a veriety of many colors resembling sugar paper pastels.</p>
-								<a href="#pkp" class="btn btn-link btn-danger">See more</a>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-3">
-						<div class="info">
-							<div class="icon icon-danger">
-								<i class="nc-icon nc-sun-fog-29"></i>
-							</div>
-							<div class="description">
-								<h4 class="info-title">Delightful design</h4>
-								<p>Find unique and handmade delightful designs related items directly from our sellers.</p>
-								<a href="#pkp" class="btn btn-link btn-danger">See more</a>
-							</div>
-						</div>
-					</div>
-				</div>
-
             </div>
         </div>
 
