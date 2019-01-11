@@ -29,7 +29,7 @@
               <p>Players</p>
             </a>
           </li>
-          <li class="active ">
+          <li>
             <a href="{{ url_for('mk_team') }}">
               <i class="fa fa-users" aria-hidden="true"></i>
               <p>Teams</p>
@@ -41,7 +41,7 @@
               <p>Results</p>
             </a>
           </li>
-          <li>
+          <li class="active ">
             <a href="{{ url_for('mk_stat') }}">
               <i class="fa fa-area-chart" aria-hidden="true"></i>
               <p>Statistics</p>
@@ -68,48 +68,72 @@
 </div> -->
       <div class="content">
         <div class="row">
-          <div class="col-md-12">
-            <button class="btn btn-primary btn-round">
-              Add Team
-            </button>
+          <div class="col-md-4">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Course Popularity</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Top Racer Per Course</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Top Team Per Course</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
             <div class="card ">
               <div class="card-header ">
-                <h5 class="card-title">Teams</h5>
+                <h5 class="card-title">Player Ratings Evolution</h5>
               </div>
               <div class="card-body ">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead class="text-primary">
-                      <tr>
-                        <th>Team Name</th>
-                        <th>Member TBD Loop</th>
-                        <th>Member TBD Loop</th>
-                        <th>Since</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>
-                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
-                            <i class="fa fa-users"></i>
-                          </button>
-                          <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
-                            <i class="fa fa-edit"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Team Ratings Evolution</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Addicted Players</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Addicted Teams</h5>
+              </div>
+              <div class="card-body ">
               </div>
             </div>
           </div>
