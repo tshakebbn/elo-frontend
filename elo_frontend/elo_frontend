@@ -90,6 +90,50 @@ def mk_home():
 
     return flask.render_template('mk.html')
 
+@FRONTEND.route('/mkplayer.html')
+def mk_player():
+    """Mario Kart player page
+
+    Returns:
+        displays Mario Kart player page
+
+    """
+
+    return flask.render_template('mkplayer.html')
+
+@FRONTEND.route('/mkteam.html')
+def mk_team():
+    """Mario Kart team page
+
+    Returns:
+        displays Mario Kart team page
+
+    """
+
+    return flask.render_template('mkteam.html')
+
+@FRONTEND.route('/mkresult.html')
+def mk_result():
+    """Mario Kart result page
+
+    Returns:
+        displays Mario Kart result page
+
+    """
+
+    return flask.render_template('mkresult.html')
+
+@FRONTEND.route('/mkstat.html')
+def mk_stat():
+    """Mario Kart stat page
+
+    Returns:
+        displays Mario Kart stat page
+
+    """
+
+    return flask.render_template('mkstat.html')
+
 @FRONTEND.route('/mp.html')
 def mp_home():
     """Mario Party home page
@@ -100,6 +144,50 @@ def mp_home():
     """
 
     return flask.render_template('mp.html')
+
+@FRONTEND.route('/mpplayer.html')
+def mp_player():
+    """Mario Party player page
+
+    Returns:
+        displays Mario Party player page
+
+    """
+
+    return flask.render_template('mpplayer.html')
+
+@FRONTEND.route('/mpteam.html')
+def mp_team():
+    """Mario Party team page
+
+    Returns:
+        displays Mario Party team page
+
+    """
+
+    return flask.render_template('mpteam.html')
+
+@FRONTEND.route('/mpresult.html')
+def mp_result():
+    """Mario Party result page
+
+    Returns:
+        displays Mario Party result page
+
+    """
+
+    return flask.render_template('mpresult.html')
+
+@FRONTEND.route('/mpstat.html')
+def mp_stat():
+    """Mario Party stat page
+
+    Returns:
+        displays Mario Party stat page
+
+    """
+
+    return flask.render_template('mpstat.html')
 
 @FRONTEND.route('/ss.html')
 def ss_home():
@@ -112,6 +200,50 @@ def ss_home():
 
     return flask.render_template('ss.html')
 
+@FRONTEND.route('/ssplayer.html')
+def ss_player():
+    """Super Smash player page
+
+    Returns:
+        displays Super Smash player page
+
+    """
+
+    return flask.render_template('ssplayer.html')
+
+@FRONTEND.route('/ssteam.html')
+def ss_team():
+    """Super Smash team page
+
+    Returns:
+        displays Super Smash team page
+
+    """
+
+    return flask.render_template('ssteam.html')
+
+@FRONTEND.route('/ssresult.html')
+def ss_result():
+    """Super Smash result page
+
+    Returns:
+        displays Super Smash result page
+
+    """
+
+    return flask.render_template('ssresult.html')
+
+@FRONTEND.route('/ssstat.html')
+def ss_stat():
+    """Super Smash stat page
+
+    Returns:
+        displays Super Smash stat page
+
+    """
+
+    return flask.render_template('ssstat.html')
+
 @FRONTEND.route('/pp.html')
 def pp_home():
     """Ping Pong home page
@@ -123,6 +255,39 @@ def pp_home():
 
     return flask.render_template('pp.html')
 
+@FRONTEND.route('/ppplayer.html')
+def pp_player():
+    """Ping pong player page
+
+    Returns:
+        displays ping pong player page
+
+    """
+
+    return flask.render_template('ppplayer.html')
+
+@FRONTEND.route('/ppresult.html')
+def pp_result():
+    """Ping pong result page
+
+    Returns:
+        displays ping pong result page
+
+    """
+
+    return flask.render_template('ppresult.html')
+
+@FRONTEND.route('/ppstat.html')
+def pp_stat():
+    """Ping pong stat page
+
+    Returns:
+        displays ping pong stat page
+
+    """
+
+    return flask.render_template('ppstat.html')
+
 @FRONTEND.route('/fb.html')
 def fb_home():
     """Foosball home page
@@ -133,6 +298,50 @@ def fb_home():
     """
 
     return flask.render_template('fb.html')
+
+@FRONTEND.route('/fbplayer.html')
+def fb_player():
+    """Foosball player page
+
+    Returns:
+        displays foosball player page
+
+    """
+
+    return flask.render_template('fbplayer.html')
+
+@FRONTEND.route('/fbteam.html')
+def fb_team():
+    """Foosball team page
+
+    Returns:
+        displays Foosball team page
+
+    """
+
+    return flask.render_template('fbteam.html')
+
+@FRONTEND.route('/fbresult.html')
+def fb_result():
+    """Foosball result page
+
+    Returns:
+        displays Foosball result page
+
+    """
+
+    return flask.render_template('fbresult.html')
+
+@FRONTEND.route('/fbstat.html')
+def fb_stat():
+    """Foosball stat page
+
+    Returns:
+        displays foosball stat page
+
+    """
+
+    return flask.render_template('fbstat.html')
 
 def setup_argparser():
     """ Creates Elo Frontend argument parser
