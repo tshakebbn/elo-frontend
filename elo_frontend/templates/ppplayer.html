@@ -18,31 +18,25 @@
       <div class="sidebar-wrapper">
         <ul class="nav">
           <li>
-            <a href="{{ url_for('mk_home') }}">
+            <a href="{{ url_for('pp_home') }}">
               <i class="fa fa-tachometer" aria-hidden="true"></i>
               <p>Dashboard</p>
             </a>
           </li>
-          <li>
-            <a href="{{ url_for('mk_player') }}">
+          <li class="active ">
+            <a href="{{ url_for('pp_player') }}">
               <i class="fa fa-user" aria-hidden="true"></i>
               <p>Players</p>
             </a>
           </li>
           <li>
-            <a href="{{ url_for('mk_team') }}">
-              <i class="fa fa-users" aria-hidden="true"></i>
-              <p>Teams</p>
-            </a>
-          </li>
-          <li>
-            <a href="{{ url_for('mk_result') }}">
+            <a href="{{ url_for('pp_result') }}">
               <i class="fa fa-desktop" aria-hidden="true"></i>
               <p>Results</p>
             </a>
           </li>
-          <li class="active ">
-            <a href="{{ url_for('mk_stat') }}">
+          <li>
+            <a href="{{ url_for('pp_stat') }}">
               <i class="fa fa-area-chart" aria-hidden="true"></i>
               <p>Statistics</p>
             </a>
@@ -55,7 +49,7 @@
       <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
         <div class="container-fluid">
           <div class="navbar-wrapper">
-            <a class="navbar-brand">Mario Kart</a>
+            <a class="navbar-brand">Ping Pong</a>
           </div>
         </div>
       </nav>
@@ -68,72 +62,48 @@
 </div> -->
       <div class="content">
         <div class="row">
-          <div class="col-md-4">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Course Popularity</h5>
-              </div>
-              <div class="card-body ">
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Top Racer Per Course</h5>
-              </div>
-              <div class="card-body ">
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Top Team Per Course</h5>
-              </div>
-              <div class="card-body ">
-              </div>
-            </div>
+          <div class="col-md-12">
+            <button class="btn btn-primary btn-round">
+              Add Player
+            </button>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
             <div class="card ">
               <div class="card-header ">
-                <h5 class="card-title">Player Ratings Evolution</h5>
+                <h5 class="card-title">Players</h5>
               </div>
               <div class="card-body ">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Team Ratings Evolution</h5>
-              </div>
-              <div class="card-body ">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Addicted Players</h5>
-              </div>
-              <div class="card-body ">
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Addicted Teams</h5>
-              </div>
-              <div class="card-body ">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead class="text-primary">
+                      <tr>
+                        <th>First Name</th>
+                        <th>Nickname</th>
+                        <th>Last Name</th>
+                        <th>Since</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>TBD</td>
+                        <td>TBD</td>
+                        <td>TBD</td>
+                        <td>TBD</td>
+                        <td>
+                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
+                            <i class="fa fa-user"></i>
+                          </button>
+                          <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
+                            <i class="fa fa-edit"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
