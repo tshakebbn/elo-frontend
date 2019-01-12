@@ -48,7 +48,7 @@ FRONTEND = flask.Flask(
     static_folder=pkg_resources.resource_filename('elo_frontend', 'static'),
     template_folder=pkg_resources.resource_filename('elo_frontend', 'templates'))
 
-DB_MANAGER = elo_frontend.DBManger(db_user='elo', db_pass='password')
+DB_MANAGER = elo_frontend.DBManager(db_user='elo', db_pass='password')
 
 @FRONTEND.route('/')
 def index_redirect():
