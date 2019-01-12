@@ -3,7 +3,7 @@
     <nav class="navbar navbar-expand-lg fixed-top navbar-transparent" color-on-scroll="300">
         <div class="container">
 			<div class="navbar-translate">
-				<a class="navbar-brand" href="https://www.creative-tim.com">BBN Technologies</a>
+				<a class="navbar-brand" href="https://www.bbn.com">BBN Technologies</a>
 			</div>
 	        <div class="collapse navbar-collapse" id="navbarToggler">
 	            <ul class="navbar-nav ml-auto">
@@ -14,10 +14,10 @@
                         </a>
                     </li>
 	                <li class="nav-item">
-	                    <a href="#" target="_blank" class="nav-link"><i class="nc-icon nc-book-bookmark"></i>  Documentation</a>
+	                    <a href="https://github.com/tshakebbn/elo-frontend/wiki" target="_blank" class="nav-link"><i class="nc-icon nc-book-bookmark"></i>  Documentation</a>
 	                </li>
                     <li class="nav-item">
-                        <a href="#" target="_blank" class="nav-link"><i class="fa fa-user-circle" aria-hidden="true"></i>  Login</a>
+                        <a href="{{ url_for('mk_home') }}" target="_blank" class="nav-link"><i class="fa fa-user-circle" aria-hidden="true"></i>  Login</a>
                     </li>
 
 	            </ul>
@@ -43,9 +43,9 @@
                         <h2 class="title">Mario Kart</h2>
                         <h5 class="description">Mario Kart description paragraph</h5>
                         <br>
-                        <button class="btn btn-danger btn-round btn-lg">
+                        <a href="{{ url_for('mk_home') }}"><button class="btn btn-danger btn-round btn-lg">
                             View Ratings
-                        </button>
+                        </button></a>
                     </div>
                     <div class="col-md-6">
                         <img src="{{ url_for('static', filename='img/mk.png') }}" class="img-fluid" alt="Responsive image">
@@ -63,9 +63,9 @@
                         <h2 class="title">Ping Pong</h2>
                         <h5 class="description">Ping Pong description paragraph</h5>
                         <br>
-                        <button class="btn btn-danger btn-round btn-lg">
+                        <a href="{{ url_for('pp_home') }}"><button class="btn btn-danger btn-round btn-lg">
                             View Ratings
-                        </button>
+                        </button></a>
                     </div>
                 </div>
             </div>
@@ -77,9 +77,9 @@
                         <h2 class="title">Super Smash</h2>
                         <h5 class="description">Super Smash description paragraph</h5>
                         <br>
-                        <button class="btn btn-danger btn-round btn-lg">
+                        <a href="{{ url_for('ss_home') }}"><button class="btn btn-danger btn-round btn-lg">
                             View Ratings
-                        </button>
+                        </button></a>
                     </div>
                     <div class="col-md-6">
                         <img src="{{ url_for('static', filename='img/smash.png') }}" class="img-fluid" alt="Responsive image">
@@ -97,9 +97,9 @@
                         <h2 class="title">Foosball</h2>
                         <h5 class="description">Foosball description paragraph</h5>
                         <br>
-                        <button class="btn btn-danger btn-round btn-lg">
+                        <a href="{{ url_for('fb_home') }}"><button class="btn btn-danger btn-round btn-lg">
                             View Ratings
-                        </button>
+                        </button></a>
                     </div>
                 </div>
             </div>
@@ -111,9 +111,9 @@
                         <h2 class="title">Mario Party</h2>
                         <h5 class="description">Mario Party description paragraph</h5>
                         <br>
-                        <button class="btn btn-danger btn-round btn-lg">
+                        <a href="{{ url_for('mp_home') }}"><button class="btn btn-danger btn-round btn-lg">
                             View Ratings
-                        </button>
+                        </button></a>
                     </div>
                     <div class="col-md-6">
                         <img src="{{ url_for('static', filename='img/mp.png') }}" class="img-fluid" alt="Responsive image">
