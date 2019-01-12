@@ -1,0 +1,165 @@
+{% extends "dbtemplate.html" %}
+{% block body %}
+  <div class="wrapper ">
+    <div class="sidebar" data-color="white" data-active-color="danger">
+      <!--
+        Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red | yellow"
+    -->
+      <div class="logo">
+        <a href="{{ url_for('index') }}" class="simple-text logo-mini">
+          <div class="logo-image-small">
+            <img src="{{ url_for('static', filename='img/bbn-logo-small.png') }}">
+          </div>
+        </a>
+        <a href="{{ url_for('index') }}" class="simple-text logo-normal">
+          Elo Ratings
+        </a>
+      </div>
+      <div class="sidebar-wrapper">
+        <ul class="nav">
+          <li>
+            <a href="{{ url_for('mp_home') }}">
+              <i class="fa fa-tachometer" aria-hidden="true"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('mp_player') }}">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              <p>Players</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('mp_team') }}">
+              <i class="fa fa-users" aria-hidden="true"></i>
+              <p>Teams</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('mp_result') }}">
+              <i class="fa fa-desktop" aria-hidden="true"></i>
+              <p>Results</p>
+            </a>
+          </li>
+          <li class="active ">
+            <a href="{{ url_for('mp_stat') }}">
+              <i class="fa fa-area-chart" aria-hidden="true"></i>
+              <p>Statistics</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <a class="navbar-brand">Mario Party</a>
+          </div>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+      <!-- <div class="panel-header panel-header-lg">
+  
+  <canvas id="bigDashboardChart"></canvas>
+  
+  
+</div> -->
+      <div class="content">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Character Popularity</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Top Player Per Character</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Team Popularity</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Player Ratings Evolution</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Team Ratings Evolution</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Addicted Players</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card ">
+              <div class="card-header ">
+                <h5 class="card-title">Addicted Teams</h5>
+              </div>
+              <div class="card-body ">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer footer-black  footer-white ">
+        <div class="container-fluid">
+          <div class="row">
+            <nav class="footer-nav">
+              <ul>
+                <li>
+                  <a href="https://www.bbn.com" target="_blank">BBN Technologies</a>
+                </li>
+              </ul>
+            </nav>
+            <div class="credits ml-auto">
+              <span class="copyright">
+                ©
+                <script>
+                  document.write(new Date().getFullYear())
+                </script>, made with <i class="fa fa-heart heart"></i> by Creative Tim
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+{% endblock %}
