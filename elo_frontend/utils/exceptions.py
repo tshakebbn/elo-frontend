@@ -1,6 +1,9 @@
-"""Elo Frontend installation and setup script
+"""@package exceptions
+Elo exceptions
 
-@file setup.py
+This script contains all Elo frontend specific exceptions.
+
+@file exceptions.py
 
 @author Tyler Shake
 
@@ -28,27 +31,23 @@ SOFTWARE.
 
 """
 
-import os
-import setuptools
+class Error(Exception):
+    """Base class for exceptions"""
+    pass
 
-def read(fname):
-    """Utility function to read the README file
+class ConfigError(Error):
+    """An config file or configuration exception.
 
     Args:
-        fname (str):    name of file to read
+        msg (str):  The error message
+
+    Attributes:
+        msg (str):  The error message
 
     """
 
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    def __init__(self, msg):
+        """Constructor with error message argument."""
 
-setuptools.setup(
-    name="elo_frontend",
-    version="1.0.0.0",
-    author="Tyler Shake",
-    description=("Elo Frontend Server"),
-    license="MIT",
-    packages=['elo_frontend', 'elo_frontend.utils', 'config'],
-    long_description=read('README.md'),
-    include_package_data=True,
-    scripts=['elo_frontend/elo_frontend'],
-)
+        super(ConfigError, self).__init__(msg)
+        self.msg = msg
