@@ -18,31 +18,31 @@
       <div class="sidebar-wrapper">
         <ul class="nav">
           <li>
-            <a href="{{ url_for('mk_home') }}">
+            <a href="{{ url_for('ss_home') }}">
               <i class="fa fa-tachometer" aria-hidden="true"></i>
               <p>Dashboard</p>
             </a>
           </li>
-          <li>
-            <a href="{{ url_for('mk_player') }}">
+          <li class="active ">
+            <a href="{{ url_for('ss_player') }}">
               <i class="fa fa-user" aria-hidden="true"></i>
               <p>Players</p>
             </a>
           </li>
-          <li class="active ">
-            <a href="{{ url_for('mk_team') }}">
+          <li>
+            <a href="{{ url_for('ss_team') }}">
               <i class="fa fa-users" aria-hidden="true"></i>
               <p>Teams</p>
             </a>
           </li>
           <li>
-            <a href="{{ url_for('mk_result') }}">
+            <a href="{{ url_for('ss_result') }}">
               <i class="fa fa-desktop" aria-hidden="true"></i>
               <p>Results</p>
             </a>
           </li>
           <li>
-            <a href="{{ url_for('mk_stat') }}">
+            <a href="{{ url_for('ss_stat') }}">
               <i class="fa fa-area-chart" aria-hidden="true"></i>
               <p>Statistics</p>
             </a>
@@ -55,7 +55,7 @@
       <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
         <div class="container-fluid">
           <div class="navbar-wrapper">
-            <a class="navbar-brand">Mario Kart</a>
+            <a class="navbar-brand">Super Smash</a>
           </div>
         </div>
       </nav>
@@ -70,7 +70,7 @@
         <div class="row">
           <div class="col-md-12">
             <button class="btn btn-primary btn-round">
-              Add Team
+              Add Player
             </button>
           </div>
         </div>
@@ -78,16 +78,16 @@
           <div class="col-md-12">
             <div class="card ">
               <div class="card-header ">
-                <h5 class="card-title">Teams</h5>
+                <h5 class="card-title">Players</h5>
               </div>
               <div class="card-body ">
                 <div class="table-responsive">
                   <table class="table">
                     <thead class="text-primary">
                       <tr>
-                        <th>Team Name</th>
-                        <th>Member TBD Loop</th>
-                        <th>Member TBD Loop</th>
+                        <th>First Name</th>
+                        <th>Nickname</th>
+                        <th>Last Name</th>
                         <th>Since</th>
                         <th>Actions</th>
                       </tr>
@@ -100,7 +100,7 @@
                         <td>TBD</td>
                         <td>
                           <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
-                            <i class="fa fa-users"></i>
+                            <i class="fa fa-user"></i>
                           </button>
                           <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
                             <i class="fa fa-edit"></i>
