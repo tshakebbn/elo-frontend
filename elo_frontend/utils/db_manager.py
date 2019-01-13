@@ -35,7 +35,7 @@ import logging
 import logging.config
 import os
 import ConfigParser
-import psycopg2
+import MySQLdb
 import pkg_resources
 import appdirs
 
@@ -72,9 +72,8 @@ class DBManager(object):
         self._db_name = self._config.get('options', 'db_name')
         self._db_host = self._config.get('options', 'db_host')
         self._db_port = self._config.get('options', 'db_port')
-        self._db_conn = psycopg2.connect(database=self._db_name, user=self._db_user,
-                                         password=self._db_pass, host=self._db_host,
-                                         port=self._db_port)
+        self._db_conn = MySQLdb.connect(user=self._db_user, passwd=self._db_pass,
+                                        host=self._db_host, db=self._db_name)
         cursor = self._db_conn.cursor()
         self._logger.info("Creating tables")
 
