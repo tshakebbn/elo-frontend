@@ -35,6 +35,7 @@ import logging
 import logging.config
 import os
 import ConfigParser
+import time
 import MySQLdb
 import pkg_resources
 import appdirs
@@ -66,6 +67,7 @@ class DBManager(object):
         # setup logger, config, and utility directory
         self._configure()
 
+        time.sleep(10)
         self._logger.info("Connecting to database")
         self._db_user = db_user
         self._db_pass = db_pass
