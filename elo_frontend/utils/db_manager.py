@@ -157,17 +157,17 @@ CONSTRAINT fb_team_rating \
 FOREIGN KEY (fb_team_rating) \
 REFERENCES rating (rating_id) \
 ON DELETE NO ACTION \
-ON UPDATE NO ACTION \
+ON UPDATE NO ACTION, \
 CONSTRAINT mk_team_rating \
 FOREIGN KEY (mk_team_rating) \
 REFERENCES rating (rating_id) \
 ON DELETE NO ACTION \
-ON UPDATE NO ACTION \
+ON UPDATE NO ACTION, \
 CONSTRAINT mp_team_rating \
 FOREIGN KEY (mp_team_rating) \
 REFERENCES rating (rating_id) \
 ON DELETE NO ACTION \
-ON UPDATE NO ACTION \
+ON UPDATE NO ACTION, \
 CONSTRAINT ss_team_rating \
 FOREIGN KEY (ss_team_rating) \
 REFERENCES rating (rating_id) \
@@ -372,7 +372,7 @@ CONSTRAINT ss_ind_fourth \
 FOREIGN KEY (ss_ind_fourth) \
 REFERENCES player (player_id) \
 ON DELETE NO ACTION \
-ON UPDATE NO ACTION \
+ON UPDATE NO ACTION, \
 CONSTRAINT ss_ind_fifth \
 FOREIGN KEY (ss_ind_fifth) \
 REFERENCES player (player_id) \
