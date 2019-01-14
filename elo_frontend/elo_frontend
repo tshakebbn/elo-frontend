@@ -370,9 +370,8 @@ def add_ppplayer():
             pass
 
         message = 'Player successfully added'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('ppplayer.html', message=message,
-                                     players=players)
+        #players = DB_MANAGER.get_all_players()
+        return flask.render_template('ppplayer.html', message=message)
 
     elif flask.request.method == 'GET':
         return flask.render_template('addppplayer.html')
