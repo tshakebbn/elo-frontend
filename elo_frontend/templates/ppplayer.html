@@ -98,11 +98,12 @@
                       </tr>
                     </thead>
                     <tbody>
+                      {% for first_name, last_name, nickname, time in players %}
                       <tr>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
+                        <td>{{ first_name }}</td>
+                        <td>{{ last_name }}</td>
+                        <td>{{ nickname }}</td>
+                        <td>{{ time }}</td>
                         <td>
                           <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
                             <i class="fa fa-user"></i>

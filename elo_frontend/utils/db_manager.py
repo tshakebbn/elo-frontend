@@ -775,6 +775,40 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
         else:
             return rating_id
 
+    def get_all_players(self):
+        """Method to get all players from database
+
+        Returns:
+            tuple of player tuples
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting player list")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT first_name, last_name, nickname, time FROM player \
+    ORDER BY time DESC")
+            players = cursor.fetchall()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return players
+
     def _configure(self):
 
         # configure directories and files
