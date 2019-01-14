@@ -51,3 +51,71 @@ class ConfigError(Error):
 
         super(ConfigError, self).__init__(msg)
         self.msg = msg
+
+class HTTPError(Error):
+    """An HTTP exception.
+
+    Args:
+        msg (str):  The error message
+
+    Attributes:
+        msg (str):  The error message
+
+    """
+
+    def __init__(self, msg):
+        """Constructor with error message argument."""
+
+        super(HTTPError, self).__init__(msg)
+        self.msg = msg
+
+class DBValueError(Error):
+    """An Database value exception.
+
+    Args:
+        msg (str):  The error message
+
+    Attributes:
+        msg (str):  The error message
+
+    """
+
+    def __init__(self, msg):
+        """Constructor with error message argument."""
+
+        super(DBValueError, self).__init__(msg)
+        self.msg = msg
+
+class DBConnectionError(Error):
+    """An Database connection exception.
+
+    Args:
+        msg (str):  The error message
+
+    Attributes:
+        msg (str):  The error message
+
+    """
+
+    def __init__(self, msg):
+        """Constructor with error message argument."""
+
+        super(DBConnectionError, self).__init__(msg)
+        self.msg = msg
+
+class DBSyntaxError(Error):
+    """An Database programming syntax exception.
+
+    Args:
+        msg (str):  The error message
+
+    Attributes:
+        msg (str):  The error message
+
+    """
+
+    def __init__(self, msg):
+        """Constructor with error message argument."""
+
+        super(DBSyntaxError, self).__init__(msg)
+        self.msg = msg

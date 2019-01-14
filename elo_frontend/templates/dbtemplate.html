@@ -16,6 +16,11 @@
   <!-- CSS Files -->
   <link href="{{ url_for('static', filename='css/pdbootstrap.min.css') }}" rel="stylesheet" />
   <link href="{{ url_for('static', filename='css/paper-dashboard.css') }}" rel="stylesheet" />
+  <!-- SweetAlert Files -->
+  <script src="{{ url_for('static', filename='node_modules/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
+  <!-- Optional: include a polyfill for ES6 Promises for IE11 and Android browser -->
+  <script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+  <link href="{{ url_for('static', filename='node_modules/sweetalert2/dist/sweetalert2.min.css') }}" rel="stylesheet" />
 </head>
 
 <body class="">

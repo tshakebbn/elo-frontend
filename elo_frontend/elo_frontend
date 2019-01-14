@@ -347,6 +347,39 @@ def fb_stat():
 
     return flask.render_template('fbstat.html')
 
+@FRONTEND.route('/addppplayer.html', methods=['GET', 'POST'])
+def add_ppplayer():
+    """Ping pong add player page
+
+    Returns:
+        displays ping pong player page
+
+    """
+
+    if flask.request.method == 'POST':
+        first_name = flask.request.form['first_name'].encode('utf-8')
+        last_name = flask.request.form['last_name'].encode('utf-8')
+        nickname = flask.request.form['nickname'].encode('utf-8')
+
+        try:
+            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                  nickname=nickname)
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addppplayer.html', error=error)
+        else:
+            pass
+
+        message = 'Player successfully added'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('ppplayer.html', message=message,
+                                     players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addppplayer.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
 def setup_argparser():
     """ Creates Elo Frontend argument parser
 

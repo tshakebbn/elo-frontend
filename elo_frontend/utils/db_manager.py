@@ -34,11 +34,13 @@ SOFTWARE.
 import logging
 import logging.config
 import os
+import traceback
 import ConfigParser
 import time
 import MySQLdb
 import pkg_resources
 import appdirs
+import trueskill
 
 import elo_frontend.utils.exceptions as exceptions
 
@@ -617,6 +619,161 @@ FOREIGN KEY (player) \
 REFERENCES player (player_id) \
 ON DELETE NO ACTION \
 ON UPDATE NO ACTION)")
+
+    def add_player(self, first_name, last_name, nickname):
+        """Example method description.
+
+        Args:
+            first_name (str):   players first name
+            last_name (str):    players last name
+            nickname (str):     player's nickname
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        Returns:
+            self.attr1
+
+        """
+
+        if len(first_name) is 0:
+            self._logger.error("First name must be at least one character")
+            raise exceptions.DBValueError("First name must be at least one character")
+
+        if len(last_name) is 0:
+            self._logger.error("Last name must be at least one character")
+            raise exceptions.DBValueError("Last name must be at least one character")
+
+        try:
+            if not self.check_if_player_exists(first_name=first_name, last_name=last_name,
+                                               nickname=nickname):
+                raise exceptions.DBValueError("Name already exists in database")
+
+            fb_offense_rating_id = self.create_new_default_rating()
+            fb_defense_rating_id = self.create_new_default_rating()
+            mk_ind_rating_id = self.create_new_default_rating()
+            mp_ind_rating_id = self.create_new_default_rating()
+            ss_ind_rating_id = self.create_new_default_rating()
+            pp_ind_rating_id = self.create_new_default_rating()
+
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            self._logger.info("Adding new player to database")
+            cursor.execute("INSERT INTO player (first_name, last_name, \
+nickname, fb_offense_rating, fb_defense_rating, mk_ind_rating, mp_ind_rating, \
+ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
+{3}, {4}, {5}, {6}, {7}, {8})".format(first_name, last_name, nickname, fb_offense_rating_id,
+                                      fb_defense_rating_id, mk_ind_rating_id, mp_ind_rating_id,
+                                      ss_ind_rating_id, pp_ind_rating_id))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
+    def check_if_player_exists(self, first_name, last_name, nickname):
+        """Method to check if player currently exists in database
+
+        Args:
+            first_name (str):   player first name
+            last_name(str):     player last name
+            nickname (str):     player nickname
+
+        Returns:
+            True/False if player exists
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        try:
+            self._logger.debug("Checking if player already exists")
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT first_name, last_name, nickname FROM player")
+            players = cursor.fetchall()
+
+            for existing_first_name, existing_last_name, existing_nickname in players:
+                if (first_name == existing_first_name) and (last_name ==
+                    existing_last_name) and (nickname == existing_nickname):
+                    return False
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return True
+
+    def check_if_db_connected(self):
+        """Method to check if still connected to database"""
+
+        self._logger.debug("Checking if database is still connected")
+        try:
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT * FROM player")
+
+        except MySQLdb.OperationalError:
+            self._logger.info("Database connection dropped, reconnecting...")
+            traceback.print_exc()
+            self._db_conn = MySQLdb.connect(user=self._db_user, passwd=self._db_pass,
+                                            host=self._db_host, db=self._db_name)
+
+        else:
+            pass
+
+    def create_new_default_rating(self):
+        """Creates a new rating at the default level
+
+        Returns:
+            rating_id for rating just created
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        try:
+            self._logger.debug("Creating new default rating")
+            new_rating = trueskill.Rating()
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1})".format(
+                new_rating.mu, new_rating.sigma))
+            rating_id = cursor.lastrowid
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return rating_id
 
     def _configure(self):
 

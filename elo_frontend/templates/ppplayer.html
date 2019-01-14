@@ -61,6 +61,17 @@
   
 </div> -->
       <div class="content">
+
+        {% if message %}
+        <script>
+          sweetAlert({
+            type: 'success',
+            title: 'Success!',
+            text: "{{ message }}",
+          });
+        </script>
+        {% endif %}
+
         <div class="row">
           <div class="col-md-12">
             <button class="btn btn-primary btn-round">
