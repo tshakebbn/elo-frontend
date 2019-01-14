@@ -101,12 +101,12 @@ ss_ind_rating INT NOT NULL,\
 pp_ind_rating INT NOT NULL,\
 PRIMARY KEY (player_id),\
 UNIQUE INDEX player_id_UNIQUE (player_id ASC),\
-INDEX fb_offense_rating_idx (offense_rating ASC),\
-INDEX fb_defense_rating_idx (defense_rating ASC),\
-INDEX mk_rating_ind_idx (offense_rating ASC),\
-INDEX mp_rating_ind_idx (defense_rating ASC),\
-INDEX ss_rating_ind_idx (offense_rating ASC),\
-INDEX pp_rating_ind_idx (defense_rating ASC),\
+INDEX fb_offense_rating_idx (fb_offense_rating ASC),\
+INDEX fb_defense_rating_idx (fb_defense_rating ASC),\
+INDEX mk_rating_ind_idx (mk_ind_rating ASC),\
+INDEX mp_rating_ind_idx (mp_ind_rating ASC),\
+INDEX ss_rating_ind_idx (ss_ind_rating ASC),\
+INDEX pp_rating_ind_idx (pp_ind_rating ASC),\
 CONSTRAINT fb_offense_rating \
 FOREIGN KEY (fb_offense_rating) \
 REFERENCES rating (rating_id) \
@@ -149,10 +149,10 @@ ss_team_rating INT NOT NULL,\
 PRIMARY KEY (team_id),\
 UNIQUE INDEX team_id_UNIQUE (team_id ASC),\
 UNIQUE INDEX team_name_UNIQUE (team_name ASC),\
-INDEX fb_team_rating_idx (rating ASC),\
-INDEX mk_team_rating_idx (rating ASC),\
-INDEX mp_team_rating_idx (rating ASC),\
-INDEX ss_team_rating_idx (rating ASC),\
+INDEX fb_team_rating_idx (fb_team_rating ASC),\
+INDEX mk_team_rating_idx (mk_team_rating ASC),\
+INDEX mp_team_rating_idx (mp_team_rating ASC),\
+INDEX ss_team_rating_idx (ss_team_rating ASC),\
 CONSTRAINT fb_team_rating \
 FOREIGN KEY (fb_team_rating) \
 REFERENCES rating (rating_id) \
