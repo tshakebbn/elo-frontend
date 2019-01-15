@@ -67,53 +67,44 @@
   
 </div> -->
       <div class="content">
+
+        {% if error %}
+        <script>
+          sweetAlert({
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
+          });
+        </script>
+        {% endif %}
+
         <div class="row">
-          <div class="col-md-12">
-            <button class="btn btn-primary btn-round">
-              Add Player
-            </button>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Players</h5>
-              </div>
-              <div class="card-body ">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead class="text-primary">
-                      <tr>
-                        <th>First Name</th>
-                        <th>Nickname</th>
-                        <th>Last Name</th>
-                        <th>Since</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for first_name, last_name, nickname, time in players %}
-                      <tr>
-                        <td>{{ first_name }}</td>
-                        <td>"{{ nickname }}"</td>
-                        <td>{{ last_name }}</td>
-                        <td>{{ time }}</td>
-                        <td>
-                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
-                            <i class="fa fa-user"></i>
-                          </button>
-                          <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
-                            <i class="fa fa-edit"></i>
-                          </button>
-                        </td>
-                      </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
+          <div class="col-md-6">
+            <form action="{{ url_for('add_fbplayer') }}" method="POST" class="form">
+              <div class="card ">
+                <div class="card-header ">
+                  <h5 class="card-title">Add Player</h5>
+                </div>
+                <div class="card-body">
+                  <div class="form-group has-label">
+                    <label for="first_name">First Name *</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required="true">
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="last_name">Last Name *</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required="true">
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="nickname">Nickname (Optional)</label>
+                    <input type="text" class="form-control" id="nickname" name="nickname">
+                  </div>
+                  <div class="category form-category">* Required fields</div>
+                </div>
+                <div class="card-footer text-center">
+                  <button type="submit" class="btn btn-primary btn-round">Submit</button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

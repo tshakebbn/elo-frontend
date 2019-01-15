@@ -103,7 +103,8 @@ def mk_player():
 
     """
 
-    return flask.render_template('mkplayer.html')
+    players = DB_MANAGER.get_all_players()
+    return flask.render_template('mkplayer.html', players=players)
 
 @FRONTEND.route('/mkteam.html')
 def mk_team():
@@ -158,7 +159,8 @@ def mp_player():
 
     """
 
-    return flask.render_template('mpplayer.html')
+    players = DB_MANAGER.get_all_players()
+    return flask.render_template('mpplayer.html', players=players)
 
 @FRONTEND.route('/mpteam.html')
 def mp_team():
@@ -213,7 +215,8 @@ def ss_player():
 
     """
 
-    return flask.render_template('ssplayer.html')
+    players = DB_MANAGER.get_all_players()
+    return flask.render_template('ssplayer.html', players=players)
 
 @FRONTEND.route('/ssteam.html')
 def ss_team():
@@ -313,7 +316,8 @@ def fb_player():
 
     """
 
-    return flask.render_template('fbplayer.html')
+    players = DB_MANAGER.get_all_players()
+    return flask.render_template('fbplayer.html', players=players)
 
 @FRONTEND.route('/fbteam.html')
 def fb_team():
@@ -377,6 +381,138 @@ def add_ppplayer():
 
     elif flask.request.method == 'GET':
         return flask.render_template('addppplayer.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/addfbplayer.html', methods=['GET', 'POST'])
+def add_fbplayer():
+    """Foosball add player page
+
+    Returns:
+        displays foosball player page
+
+    """
+
+    if flask.request.method == 'POST':
+        first_name = flask.request.form['first_name'].encode('utf-8')
+        last_name = flask.request.form['last_name'].encode('utf-8')
+        nickname = flask.request.form['nickname'].encode('utf-8')
+
+        try:
+            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                  nickname=nickname)
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addfbplayer.html', error=error)
+        else:
+            pass
+
+        message = 'Player successfully added'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('fbplayer.html', message=message,
+                                     players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addfbplayer.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/addmkplayer.html', methods=['GET', 'POST'])
+def add_mkplayer():
+    """Mario kart add player page
+
+    Returns:
+        displays mario kart player page
+
+    """
+
+    if flask.request.method == 'POST':
+        first_name = flask.request.form['first_name'].encode('utf-8')
+        last_name = flask.request.form['last_name'].encode('utf-8')
+        nickname = flask.request.form['nickname'].encode('utf-8')
+
+        try:
+            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                  nickname=nickname)
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addmkplayer.html', error=error)
+        else:
+            pass
+
+        message = 'Player successfully added'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('mkplayer.html', message=message,
+                                     players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addmkplayer.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/addmpplayer.html', methods=['GET', 'POST'])
+def add_mpplayer():
+    """Mario party add player page
+
+    Returns:
+        displays mario party player page
+
+    """
+
+    if flask.request.method == 'POST':
+        first_name = flask.request.form['first_name'].encode('utf-8')
+        last_name = flask.request.form['last_name'].encode('utf-8')
+        nickname = flask.request.form['nickname'].encode('utf-8')
+
+        try:
+            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                  nickname=nickname)
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addmpplayer.html', error=error)
+        else:
+            pass
+
+        message = 'Player successfully added'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('mpplayer.html', message=message,
+                                     players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addmpplayer.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/addssplayer.html', methods=['GET', 'POST'])
+def add_ssplayer():
+    """Super smash add player page
+
+    Returns:
+        displays super smash player page
+
+    """
+
+    if flask.request.method == 'POST':
+        first_name = flask.request.form['first_name'].encode('utf-8')
+        last_name = flask.request.form['last_name'].encode('utf-8')
+        nickname = flask.request.form['nickname'].encode('utf-8')
+
+        try:
+            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                  nickname=nickname)
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addssplayer.html', error=error)
+        else:
+            pass
+
+        message = 'Player successfully added'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('ssplayer.html', message=message,
+                                     players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addssplayer.html')
 
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
