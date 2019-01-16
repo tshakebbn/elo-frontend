@@ -841,6 +841,152 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
         else:
             return count
 
+    def add_ppresult(self, winner, loser):
+        """Method to add a ping pong result to database
+
+        Args:
+            winner(tup):    match winner
+            loser (tup):    match loser
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(winner) != 3:
+            raise exceptions.DBValueError("Winner must be complete")
+
+        if len(winner) != 3:
+            raise exceptions.DBValueError("Winner must be complete")
+
+        self._logger.debug("Adding pp result to database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("INSERT INTO pp_result (pp_winner, pp_loser) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
+= '{3}' AND last_name = '{4}' AND nickname = '{5}'))".format(
+    winner[0], winner[1], winner[2], loser[0],
+    loser[1], loser[2]))
+
+            self._logger.debug("Updating pp ratings")
+            cursor.execute("SELECT player_id, pp_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                winner[0], winner[1], winner[2]))
+            winner_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            winner_rating = trueskill.Rating(mu=float(mu),
+                                             sigma=float(sigma))
+
+            cursor.execute("SELECT player_id, pp_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                loser[0], loser[1], loser[2]))
+            loser_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            loser_rating = trueskill.Rating(mu=float(mu),
+                                            sigma=float(sigma))
+
+            new_winner_rating, new_loser_rating = \
+            trueskill.rate_1vs1(winner_rating, loser_rating)
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_winner_rating.mu, new_winner_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set pp_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, winner_player_id))
+            cursor.execute("INSERT INTO pp_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, winner_player_id))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_loser_rating.mu, new_loser_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set pp_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, loser_player_id))
+            cursor.execute("INSERT INTO pp_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, loser_player_id))
+
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
+    def get_all_ppresults(self):
+        """Method to get all pp results from database
+
+        Returns:
+            all pp results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        all_results = ()
+        self._logger.debug("Getting all ping pong results")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, pp_winner, pp_loser, time FROM result ORDER BY time DESC")
+            results = cursor.fetchall()
+
+            for result_id, winner_id, loser_id, timestamp in results:
+                intermediate_results = ()
+
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(winner_id))
+                winner = cursor.fetchall()
+                first_name_winner, last_name_winner, \
+                    nickname_winner = winner[0]
+
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(loser_id))
+                loser = cursor.fetchall()
+                first_name_loser, last_name_loser, \
+                    nickname_loser = loser[0]
+
+                intermediate_results = intermediate_results + \
+                    (result_id, first_name_winner, last_name_winner,
+                     nickname_winner, first_name_loser,
+                     last_name_loser, nickname_loser,
+                     timestamp.strftime('%Y-%m-%d'))
+
+                all_results = all_results + (intermediate_results,)
+                del intermediate_results
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return all_results
+
     def _configure(self):
 
         # configure directories and files

@@ -150,7 +150,7 @@ def mp_home():
     """
 
     player_count = DB_MANAGER.get_total_players()
-    return flask.render_template('mp.html', playercount=player_count)
+    return flask.render_template('mp.html', player_count=player_count)
 
 @FRONTEND.route('/mpplayer.html')
 def mp_player():
@@ -287,7 +287,8 @@ def pp_result():
 
     """
 
-    return flask.render_template('ppresult.html')
+    results = DB_MANAGER.get_all_ppresults()
+    return flask.render_template('ppresult.html', results=results)
 
 @FRONTEND.route('/ppstat.html')
 def pp_stat():
@@ -518,6 +519,60 @@ def add_ssplayer():
 
     elif flask.request.method == 'GET':
         return flask.render_template('addssplayer.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/addppresult.html', methods=['GET', 'POST'])
+def add_ppresult():
+    """Ping pong add result page
+
+    Returns:
+        displays ping pong add result page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        winner = flask.request.form['offense_winner'].encode('utf-8')
+        loser = flask.request.form['offense_loser'].encode('utf-8')
+
+        first_quote = winner.find('"')
+        second_quote = winner.find('"', first_quote + 1)
+        final_winner = (winner[:first_quote - 1],
+                        winner[second_quote + 2:],
+                        winner[first_quote + 1:second_quote])
+
+        first_quote = loser.find('"')
+        second_quote = loser.find('"', first_quote + 1)
+        final_loser = (loser[:first_quote - 1],
+                       loser[second_quote + 2:],
+                       loser[first_quote + 1:second_quote])
+
+        try:
+            DB_MANAGER.add_ppresult(winner=final_winner, loser=final_loser)
+
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addppresult.html', error=error)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('addppresult.html', error=error)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('addppresult.html', error=error)
+
+        else:
+            pass
+
+        message = 'Result successfully added'
+        results = DB_MANAGER.get_all_ppresults()
+        return flask.render_template('ppresult.html', message=message,
+                                     results=results)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addppresult.html', players=players)
 
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")

@@ -87,11 +87,13 @@
                       </tr>
                     </thead>
                     <tbody>
+                      {% for result_id,
+                        first_name_winner, last_name_winner, nickname_winner, first_name_loser, last_name_loser, nickname_loser, date in results %}
                       <tr>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
+                        <td>{{ result_id }}</td>
+                        <td>{{ first_name_winner }} "{{ nickname_winner }}" {{ last_name_winner }}</td>
+                        <td>{{ first_name_loser }} "{{ nickname_loser }}" {{ last_name_loser}}</td>
+                        <td>{{ date }}</td>
                         <td>
                           <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
                             <i class="fa fa-edit"></i>
