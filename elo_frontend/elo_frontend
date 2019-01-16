@@ -264,7 +264,8 @@ def pp_home():
     """
 
     player_count = DB_MANAGER.get_total_players()
-    return flask.render_template('pp.html', player_count=player_count)
+    game_count = DB_MANAGER.get_total_ppresults()
+    return flask.render_template('pp.html', player_count=player_count, game_count=game_count)
 
 @FRONTEND.route('/ppplayer.html')
 def pp_player():

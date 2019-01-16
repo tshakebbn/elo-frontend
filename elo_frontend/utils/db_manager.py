@@ -990,6 +990,39 @@ player WHERE player_id = {0}".format(loser_id))
         else:
             return all_results
 
+    def get_total_ppresults(self):
+        """Method to get pp result count from database
+
+        Returns:
+            total number of results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting ping pong results count")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT COUNT(result_id) FROM pp_result")
+            count = cursor.fetchone()[0]
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return count
+
     def _configure(self):
 
         # configure directories and files
