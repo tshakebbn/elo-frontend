@@ -265,7 +265,10 @@ def pp_home():
 
     player_count = DB_MANAGER.get_total_players()
     game_count = DB_MANAGER.get_total_ppresults()
-    return flask.render_template('pp.html', player_count=player_count, game_count=game_count)
+    individual_ranks = DB_MANAGER.get_pp_ind_rankings()
+    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3], reverse=True)
+    return flask.render_template('pp.html', player_count=player_count, game_count=game_count,
+                                 individual_ranks=individual_ranks)
 
 @FRONTEND.route('/ppplayer.html')
 def pp_player():

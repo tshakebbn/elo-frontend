@@ -1023,6 +1023,63 @@ player WHERE player_id = {0}".format(loser_id))
         else:
             return count
 
+    def get_pp_ind_rankings(self):
+        """Method to get ping pong individual rankings from database
+
+        Returns:
+            individual rank list
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        ranks = []
+        self._logger.debug("Getting ping pong individual rankings")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT player_id, first_name, last_name, \
+nickname FROM player")
+            players = cursor.fetchall()
+
+            for player_id, first_name, last_name, nickname in players:
+                cursor.execute("SELECT pp_ind_rating FROM \
+player WHERE player_id = {0}".format(player_id))
+                ind_rating = cursor.fetchall()[0]
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(ind_rating))
+                mu, sigma = cursor.fetchall()[0]
+
+                ind_rank = float(mu) - (3 * float(sigma))
+
+                cursor.execute("SELECT COUNT(result_id) FROM pp_result WHERE \
+pp_winner = {0}".format(player_id))
+                win_count = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(result_id) FROM pp_result WHERE \
+pp_loser = {0}".format(player_id))
+                loss_count = cursor.fetchone()[0]
+
+                intermediate_rank = (first_name, last_name, nickname, round(ind_rank, 4),
+                                     win_count, loss_count)
+                ranks.append(intermediate_rank)
+                del intermediate_rank
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return ranks
+
     def _configure(self):
 
         # configure directories and files
