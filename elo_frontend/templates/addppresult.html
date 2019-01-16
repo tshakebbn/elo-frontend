@@ -83,7 +83,7 @@
                   <div class="form-group has-label">
                     <label for="winner">Winner *</label>
                     <select class="form-control" id="winner" name="winner" required="true">
-                      {% for first_name, last_name, nickname in players %}
+                      {% for first_name, last_name, nickname, time in players %}
                       <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
                       {% endfor %}
                     </select>
@@ -91,7 +91,7 @@
                   <div class="form-group has-label">
                     <label for="loser">Loser *</label>
                     <select class="form-control" id="loser" name="loser" required="true">
-                      {% for first_name, last_name, nickname in players %}
+                      {% for first_name, last_name, nickname, time in players %}
                       <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
                       {% endfor %}
                     </select>
