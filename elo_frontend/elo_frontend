@@ -535,8 +535,8 @@ def add_ppresult():
     players = DB_MANAGER.get_all_players()
 
     if flask.request.method == 'POST':
-        winner = flask.request.form['offense_winner'].encode('utf-8')
-        loser = flask.request.form['offense_loser'].encode('utf-8')
+        winner = flask.request.form['winner'].encode('utf-8')
+        loser = flask.request.form['loser'].encode('utf-8')
 
         first_quote = winner.find('"')
         second_quote = winner.find('"', first_quote + 1)
