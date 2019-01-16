@@ -861,6 +861,9 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
         if len(winner) != 3:
             raise exceptions.DBValueError("Winner must be complete")
 
+        if winner == loser:
+            raise exceptions.DBValueError("Winner and loser cannot be same person")
+
         self._logger.debug("Adding pp result to database")
         try:
             self.check_if_db_connected()
