@@ -947,7 +947,7 @@ player_id = {1}".format(new_rating_id, loser_player_id))
         try:
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
-            cursor.execute("SELECT result_id, pp_winner, pp_loser, time FROM result ORDER BY time DESC")
+            cursor.execute("SELECT result_id, pp_winner, pp_loser, time FROM pp_result ORDER BY time DESC")
             results = cursor.fetchall()
 
             for result_id, winner_id, loser_id, timestamp in results:
