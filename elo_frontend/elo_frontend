@@ -555,13 +555,13 @@ def add_ppresult():
 
 
         except elo_frontend.DBValueError as error:
-            return flask.render_template('addppresult.html', error=error)
+            return flask.render_template('addppresult.html', error=error, players=players)
 
         except elo_frontend.DBConnectionError as error:
-            return flask.render_template('addppresult.html', error=error)
+            return flask.render_template('addppresult.html', error=error, players=players)
 
         except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('addppresult.html', error=error)
+            return flask.render_template('addppresult.html', error=error, players=players)
 
         else:
             pass
