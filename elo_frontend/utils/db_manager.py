@@ -809,6 +809,38 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
         else:
             return players
 
+    def get_total_players(self):
+        """Method to get player count from database
+
+        Returns:
+            count of players
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting total player count")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT COUNT(player_id) FROM player")
+            count = cursor.fetchone()[0]
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return count
+
     def _configure(self):
 
         # configure directories and files

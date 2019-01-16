@@ -92,7 +92,8 @@ def mk_home():
 
     """
 
-    return flask.render_template('mk.html')
+    player_count = DB_MANAGER.get_total_players()
+    return flask.render_template('mk.html', player_count=player_count)
 
 @FRONTEND.route('/mkplayer.html')
 def mk_player():
@@ -148,7 +149,8 @@ def mp_home():
 
     """
 
-    return flask.render_template('mp.html')
+    player_count = DB_MANAGER.get_total_players()
+    return flask.render_template('mp.html', playercount=player_count)
 
 @FRONTEND.route('/mpplayer.html')
 def mp_player():
@@ -204,7 +206,8 @@ def ss_home():
 
     """
 
-    return flask.render_template('ss.html')
+    player_count = DB_MANAGER.get_total_players()
+    return flask.render_template('ss.html', player_count=player_count)
 
 @FRONTEND.route('/ssplayer.html')
 def ss_player():
@@ -260,7 +263,8 @@ def pp_home():
 
     """
 
-    return flask.render_template('pp.html')
+    player_count = DB_MANAGER.get_total_players()
+    return flask.render_template('pp.html', player_count=player_count)
 
 @FRONTEND.route('/ppplayer.html')
 def pp_player():
@@ -305,7 +309,8 @@ def fb_home():
 
     """
 
-    return flask.render_template('fb.html')
+    player_count = DB_MANAGER.get_total_players()
+    return flask.render_template('fb.html', player_count=player_count)
 
 @FRONTEND.route('/fbplayer.html')
 def fb_player():
