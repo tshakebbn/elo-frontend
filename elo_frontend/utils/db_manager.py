@@ -1048,7 +1048,7 @@ nickname FROM player")
             for player_id, first_name, last_name, nickname in players:
                 cursor.execute("SELECT pp_ind_rating FROM \
 player WHERE player_id = {0}".format(player_id))
-                ind_rating = cursor.fetchall()[0]
+                ind_rating = cursor.fetchall()[0][0]
                 cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
 = {0}".format(ind_rating))
                 mu, sigma = cursor.fetchall()[0]
