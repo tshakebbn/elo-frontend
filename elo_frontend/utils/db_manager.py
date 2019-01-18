@@ -1080,6 +1080,102 @@ pp_loser = {0}".format(player_id))
         else:
             return ranks
 
+    def get_pp_ind_rankings_hist(self, player):
+        """Method to get ping pong individual rankings history from database
+
+        Args:
+            player (str):   player
+
+        Returns:
+            history of ranks
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(player) != 3:
+            raise exceptions.DBValueError("Player must be complete")
+
+        rank_hist = []
+        self._logger.debug("Getting ping pong individual ranking history for player")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT player_id FROM player WHERE \
+first_name = '{0}' AND last_name = '{1}' AND nickname = \
+'{2}'".format(player[0], player[1], player[2]))
+            player_id = cursor.fetchone()[0]
+            cursor.execute("SELECT rating, time FROM pp_ind_rating_hist \
+WHERE player = {0} ORDER BY time DESC".format(player_id))
+            results = cursor.fetchall()
+
+            for rating, timestamp in results:
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                rank = float(mu) - (3 * float(sigma))
+                intermediate_rank = (round(rank, 4), timestamp)
+                rank_hist.append(intermediate_rank)
+                del intermediate_rank
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return rank_hist
+
+    def get_all_pp_ind_rankings_hist(self):
+        """Method to get ping pong individual rankings history from database
+
+        Returns:
+            total history of ranks
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        total_rank_hist = []
+        self._logger.debug("Getting ping pong total individual ranking history")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT first_name, last_name, \
+nickname FROM player")
+            players = cursor.fetchall()
+
+            for first_name, last_name, nickname in players:
+                intermediate_hist = self.get_pp_ind_rankings_hist((first_name, last_name, nickname))
+                total_rank_hist.append((first_name, last_name, nickname), intermediate_hist)
+                del intermediate_hist
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return total_rank_hist
+
     def _configure(self):
 
         # configure directories and files
