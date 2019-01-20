@@ -1176,6 +1176,60 @@ nickname FROM player")
         else:
             return total_rank_hist
 
+    def edit_player(self, previous_player, new_player):
+        """Method to edit player in database
+
+        Args:
+            previous_player (dict): existing player in database
+            new_player (dict):      replacement player for database
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(new_player['first_name']) is 0:
+            raise exceptions.DBValueError("First name must be at \
+least one character")
+
+        if len(new_player['last_name']) is 0:
+            raise exceptions.DBValueError("Last name must be at \
+least one character")
+
+        if not self.check_if_player_exists(**new_player):
+            raise exceptions.DBValueError("Name you are trying to change to already \
+exists in database")
+
+        self._logger.debug("Editing player in database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            sql_params = dict(previous_player.items() + new_player.items())
+            sql = """UPDATE player
+                     SET first_name='{first_name}',
+                         last_name='{last_name}',
+                         nickname='{nickname}'
+                     WHERE first_name='{previous_first_name}' AND
+                           last_name='{previous_last_name}' AND
+                           nickname='{previous_nickname}';""".format(**sql_params)
+            cursor.execute(sql)
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def _configure(self):
 
         # configure directories and files
