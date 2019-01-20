@@ -83,7 +83,7 @@
                   <div class="form-group">
                       <label for="all_players">Players</label>
                       <select class="form-control" id="previous_player" name="previous_player">
-                          {% for first_name, last_name, nickname in players %}
+                          {% for first_name, last_name, nickname, time in players %}
                           <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
                           {% endfor %}
                       </select>
