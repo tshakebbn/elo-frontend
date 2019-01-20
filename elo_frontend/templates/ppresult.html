@@ -109,9 +109,11 @@
                           <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
                             <i class="fa fa-edit"></i>
                           </button>
+                          {% if loop.index == 1 %}
                           <button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
                             <i class="fa fa-times"></i>
                           </button>
+                          {% endif %}
                         </td>
                       </tr>
                       {% endfor %}
