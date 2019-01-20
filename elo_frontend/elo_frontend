@@ -581,6 +581,7 @@ def add_ppresult():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
+@FRONTEND.route('/delppresult.html')
 def del_ppresult():
     """Ping pong delete result functionality
 
