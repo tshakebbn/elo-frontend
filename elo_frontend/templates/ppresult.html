@@ -72,6 +72,16 @@
         </script>
         {% endif %}
 
+        {% if error %}
+        <script>
+          sweetAlert({
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
+          });
+        </script>
+        {% endif %}
+
         <div class="row">
           <div class="col-md-12">
             <a href="{{ url_for('add_ppresult') }}"><button class="btn btn-primary btn-round">
@@ -110,9 +120,9 @@
                             <i class="fa fa-edit"></i>
                           </button>
                           {% if loop.index == 1 %}
-                          <button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
+                          <a href="{{ url_for('del_ppresult') }}"><button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
                             <i class="fa fa-times"></i>
-                          </button>
+                          </button></a>
                           {% endif %}
                         </td>
                       </tr>

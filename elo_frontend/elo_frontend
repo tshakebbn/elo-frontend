@@ -581,6 +581,36 @@ def add_ppresult():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
+def del_ppresult():
+    """Ping pong delete result functionality
+
+    Returns:
+        displays ping pong result page
+
+    """
+
+    results = DB_MANAGER.get_all_ppresults()
+
+    try:
+        DB_MANAGER.delete_last_ppresult()
+
+    except elo_frontend.DBValueError as error:
+        return flask.render_template('ppresult.html', error=error, results=results)
+
+    except elo_frontend.DBConnectionError as error:
+        return flask.render_template('ppresult.html', error=error, results=results)
+
+    except elo_frontend.DBSyntaxError as error:
+        return flask.render_template('ppresult.html', error=error, results=results)
+
+    else:
+        pass
+
+    message = 'Result successfully deleted'
+    results = DB_MANAGER.get_all_ppresults()
+    return flask.render_template('ppresult.html', message=message,
+                                 results=results)
+
 @FRONTEND.route('/editppplayer.html', methods=['GET', 'POST'])
 def edit_ppplayer():
     """Ping pong edit player page
@@ -624,6 +654,7 @@ def edit_ppplayer():
             pass
 
         message = 'Player successfully edited'
+        players = DB_MANAGER.get_all_players()
         return flask.render_template('ppplayer.html', message=message, players=players)
 
     elif flask.request.method == 'GET':

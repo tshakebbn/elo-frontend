@@ -932,6 +932,62 @@ player_id = {1}".format(new_rating_id, loser_player_id))
         else:
             pass
 
+    def delete_last_ppresult(self,):
+        """Method to delete last ping pong result from database
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        # check if there is at least one pp result
+
+        self._logger.debug("Deleting last pp result from database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, pp_winner, pp_loser FROM pp_result ORDER BY time \
+DESC LIMIT 1")
+            results = cursor.fetchall()
+            result_id = results[0]
+            winner_player_id = results[1]
+            loser_player_id = results[2]
+
+            # revert from pp_ind_rating_hist
+            cursor.execute("SELECT rating FROM pp_ind_player_hist ORDER BY time DESC LIMIT 2 \
+WHERE player = {0}".format(winner_player_id))
+            results = cursor.fetchall()
+            winner_new_rating_id = results[0]
+            winner_previous_rating_id = results[1]
+            cursor.execute("SELECT rating FROM pp_ind_player_hist ORDER BY time DESC LIMIT 2 \
+WHERE player = {0}".format(loser_player_id))
+            results = cursor.fetchall()
+            loser_new_rating_id = results[0]
+            loser_previous_rating_id = results[1]
+            # update player ratings in player
+            cursor.execute("UPDATE player set pp_ind_rating = {0} where \
+player_id = {1}".format(loser_previous_rating_id, loser_player_id))
+            cursor.execute("UPDATE player set pp_ind_rating = {0} where \
+player_id = {1}".format(winner_previous_rating_id, winner_player_id))
+            # delete result from pp_result
+            cursor.execute("DELETE FROM pp_result WHERE result_id = {0}".format(result_id))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def get_all_ppresults(self):
         """Method to get all pp results from database
 
