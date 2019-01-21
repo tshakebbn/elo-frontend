@@ -682,6 +682,109 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
         else:
             pass
 
+    def check_if_team_exists(self, team_name):
+        """Method to check if team currently exists in database
+
+        Args:
+            team_name (str):    team name
+
+        Returns:
+            True/False if team exists
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        try:
+            self._logger.debug("Checking if team already exists")
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT team_name FROM team")
+            teams = cursor.fetchall()
+
+            for existing_team in teams:
+                if team_name == existing_team:
+                    return False
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return True
+
+    def check_if_players_on_team(self, members):
+        """Method to check if players are already on a team
+
+        Args:
+            members (tup):  tuple of player tuples
+
+        Returns:
+            True/False if players are on team
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        try:
+            self._logger.debug("Checking if players are already on team together")
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+
+            player_ids = []
+            for first_name, last_name, nickname in members:
+                cursor.execute("SELECT player_id FROM player WHERE \
+first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                first_name, last_name, nickname))
+                player_ids.append(cursor.fetchone()[0])
+
+            cursor.execute("SELECT team FROM player_team_xref WHERE \
+player = {0}".format(player_ids[0]))
+            teams = cursor.fetchall()
+            team_found = False
+            for team in teams:
+                cursor.execute("SELECT player FROM player_team_xref WHERE \
+team = {0}".format(team[0]))
+                players = cursor.fetchall()
+                if len(members) == 2:
+                    if len(players) == 2:
+                        first_player = False
+                        second_player = False
+                        loop_count = 0
+                        for player in players:
+                            if player[0] in player_ids:
+                                if loop_count == 0:
+                                    first_player = True
+                                elif loop_count == 1:
+                                    second_player = True
+                            loop_count = loop_count + 1
+                        if first_player and second_player:
+                            team_found = True
+                            return team_found
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return team_found
+
     def check_if_player_exists(self, first_name, last_name, nickname):
         """Method to check if player currently exists in database
 
@@ -1271,6 +1374,201 @@ exists in database")
                            last_name='{previous_last_name}' AND
                            nickname='{previous_nickname}';""".format(**sql_params)
             cursor.execute(sql)
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
+    def edit_team(self, previous_team, new_team):
+        """Method to edit team name in database
+
+        Args:
+            previous_team (str):    existing team in database
+            new_team (str):         replacement team for database
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(new_team) is 0:
+            raise exceptions.DBValueError("Team name must be at \
+least one character")
+
+        if not self.check_if_team_exists(new_team):
+            raise exceptions.DBValueError("Name you are trying to change to already \
+exists in database")
+
+        self._logger.debug("Editing team in database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("UPDATE team SET team_name = {0} WHERE team_name = {1}".format(
+                new_team, previous_team))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
+    def get_all_fb_teams(self):
+        """Method to get all fb teams from database
+
+        Returns:
+            tuple of team tuples
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        all_teams = ()
+        self._logger.debug("Getting all fb teams from database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT team_id, team_name, time FROM team ORDER BY \
+time DESC")
+            teams = cursor.fetchall()
+
+            for team_id, name, timestamp in teams:
+                intermediate_teams = ()
+                intermediate_teams = intermediate_teams + (name,)
+                cursor.execute("SELECT player FROM player_team_xref WHERE \
+team = {0}".format(team_id))
+                players = cursor.fetchall()
+                for player in players:
+                    cursor.execute("SELECT first_name, last_name, nickname \
+FROM player WHERE player_id = {0}".format(player[0]))
+                    first_name, last_name, nickname = cursor.fetchall()[0]
+
+                    intermediate_teams = intermediate_teams + (first_name,
+                        last_name, nickname)
+                    intermediate_teams = intermediate_teams + (timestamp.strftime('%Y-%m-%d'),)
+
+                all_teams = all_teams + (intermediate_teams,)
+                del intermediate_teams
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return all_teams
+
+    def get_total_fb_teams(self):
+        """Method to get total fb teams from database
+
+        Returns:
+            total number of teams
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting total fb teams from database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT COUNT(team_id) FROM team")
+            count = cursor.fetchone()[0]
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return count
+
+    def add_fb_team(self, team_name, member_one, member_two):
+        """Method to add a fb team to database
+
+        Args:
+            team_name (str):    team name
+            member_one (tup):   first member names
+            member_two (tup):   second member names
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(team_name) is 0:
+            raise exceptions.DBValueError("Team name must be at \
+least one character")
+
+        if len(member_one) != 3:
+            raise exceptions.DBValueError("First team member must\
+ be complete")
+
+        if len(member_two) != 3:
+            raise exceptions.DBValueError("Second team member must\
+ be complete")
+
+        if not self.check_if_team_exists(team_name=team_name):
+            raise exceptions.DBValueError("Team already exists")
+
+        if self.check_if_players_on_team((member_one, member_two)):
+            raise exceptions.DBValueError("Players already on team together")
+
+        self._logger.debug("Adding fb team to database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            rating_id = self.create_new_default_rating()
+            cursor.execute("INSERT INTO team (team_name, rating) VALUES \
+('{0}', {1})".format(team_name, rating_id))
+
+            team_id = cursor.lastrowid
+
+            cursor.execute("INSERT INTO player_team_xref (player, team) \
+VALUES ((SELECT player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), {3})".format(member_one[0], member_one[1],
+                member_one[2], team_id))
+
+            cursor.execute("INSERT INTO player_team_xref (player, team) \
+VALUES ((SELECT player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), {3})".format(member_two[0], member_two[1],
+                member_two[2], team_id))
+
             self._db_conn.commit()
 
         except MySQLdb.OperationalError:

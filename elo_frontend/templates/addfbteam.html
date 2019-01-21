@@ -23,13 +23,13 @@
               <p>Dashboard</p>
             </a>
           </li>
-          <li>
+          <li class="active ">
             <a href="{{ url_for('fb_player') }}">
               <i class="fa fa-user" aria-hidden="true"></i>
               <p>Players</p>
             </a>
           </li>
-          <li class="active ">
+          <li>
             <a href="{{ url_for('fb_team') }}">
               <i class="fa fa-users" aria-hidden="true"></i>
               <p>Teams</p>
@@ -68,63 +68,51 @@
 </div> -->
       <div class="content">
 
-        {% if message %}
+        {% if error %}
         <script>
           sweetAlert({
-            type: 'success',
-            title: 'Success!',
-            text: "{{ message }}",
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
           });
         </script>
         {% endif %}
 
         <div class="row">
-          <div class="col-md-12">
-            <a href="{{ url_for('add_fbteam') }}"><button class="btn btn-primary btn-round">
-              Add Team
-            </button></a>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Teams</h5>
-              </div>
-              <div class="card-body ">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead class="text-primary">
-                      <tr>
-                        <th>Team Name</th>
-                        <th>Member</th>
-                        <th>Member</th>
-                        <th>Since</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for team_name, first_name_one, last_name_one, nickname_one, first_name_two, last_name_two, nickname_two, time in teams %}
-                      <tr>
-                        <td>{{ team_name }}</td>
-                        <td>{{ first_name_one }} "{{ nickname_one}}" {{ last_name_one }}</td>
-                        <td>{{ first_name_two }} "{{ nickname_two}}" {{ last_name_two }}</td>
-                        <td>{{ time }}</td>
-                        <td>
-                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
-                            <i class="fa fa-users"></i>
-                          </button>
-                          <a href="{{ url_for('edit_fbteam') }}"><button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
-                            <i class="fa fa-edit"></i>
-                          </button></a>
-                        </td>
-                      </tr>
+          <div class="col-md-6">
+            <form action="{{ url_for('add_fbteam') }}" method="POST" class="form">
+              <div class="card ">
+                <div class="card-header ">
+                  <h5 class="card-title">Add Team</h5>
+                </div>
+                <div class="card-body">
+                  <div class="form-group has-label">
+                    <label for="team_name">Team Name *</label>
+                    <input type="text" class="form-control" id="team_name" name="team_name" required="true" placeholder="Example Team">
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="member_one">Player One *</label>
+                    <select class="form-control" id="member_one" name="member_one">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
                       {% endfor %}
-                    </tbody>
-                  </table>
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="member_two">Player Two *</label>
+                    <select class="form-control" id="member_one" name="member_one">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="category form-category">* Required fields</div>
+                </div>
+                <div class="card-footer text-center">
+                  <button type="submit" class="btn btn-primary btn-round">Submit</button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>

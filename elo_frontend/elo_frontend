@@ -315,7 +315,8 @@ def fb_home():
     """
 
     player_count = DB_MANAGER.get_total_players()
-    return flask.render_template('fb.html', player_count=player_count)
+    team_count = DB_MANAGER.get_total_fb_teams()
+    return flask.render_template('fb.html', player_count=player_count, team_count=team_count)
 
 @FRONTEND.route('/fbplayer.html')
 def fb_player():
@@ -338,7 +339,8 @@ def fb_team():
 
     """
 
-    return flask.render_template('fbteam.html')
+    teams = DB_MANAGER.get_all_fb_teams()
+    return flask.render_template('fbteam.html', teams=teams)
 
 @FRONTEND.route('/fbresult.html')
 def fb_result():
@@ -868,6 +870,100 @@ def edit_ssplayer():
 
     elif flask.request.method == 'GET':
         return flask.render_template('editssplayer.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/addfbteam', methods=['GET', 'POST'])
+def add_fbteam():
+    """Foosball add team page
+
+    Returns:
+        displays team page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        team_name = flask.request.form['team_name'].encode('utf-8')
+        member_one = flask.request.form['member_one'].encode('utf-8')
+        member_two = flask.request.form['member_two'].encode('utf-8')
+
+        first_quote = member_one.find('"')
+        second_quote = member_one.find('"', first_quote + 1)
+        final_member_one = (member_one[:first_quote - 1],
+            member_one[second_quote + 2:],
+            member_one[first_quote + 1:second_quote])
+
+        first_quote = member_two.find('"')
+        second_quote = member_two.find('"', first_quote + 1)
+        final_member_two = (member_two[:first_quote - 1],
+            member_two[second_quote + 2:],
+            member_two[first_quote + 1:second_quote])
+
+        try:
+            DB_MANAGER.add_fb_team(team_name=team_name,
+                member_one=final_member_one, member_two=final_member_two)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addfbteam.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('addfbteam.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('addfbteam.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Team successfully added'
+        teams = DB_MANAGER.get_all_fb_teams()
+        return flask.render_template('fbteam.html', message=message, teams=teams)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addfbteam.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/editfbteam.html', methods=['GET', 'POST'])
+def edit_fbteam():
+    """Foosball edit team page
+
+    Returns:
+        displays foosball team page
+
+    """
+
+    teams = DB_MANAGER.get_all_fb_teams()
+
+    if flask.request.method == 'POST':
+        previous_team = flask.request.form['previous_team'].encode('utf-8')
+        new_team = flask.request.form['new_team'].encode('utf-8')
+
+        try:
+            DB_MANAGER.edit_team(previous_team, new_team)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('editfbteam.html', error=error, teams=teams)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('editfbteam.html', error=error, teams=teams)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('editfbteam.html', error=error, teams=teams)
+
+        else:
+            pass
+
+        message = 'Team successfully edited'
+        teams = DB_MANAGER.get_all_fb_teams()
+        return flask.render_template('fbteam.html', message=message, teams=teams)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('editfbteam.html', teams=teams)
 
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
