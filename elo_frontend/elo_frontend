@@ -664,6 +664,214 @@ def edit_ppplayer():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
+@FRONTEND.route('/editfbplayer.html', methods=['GET', 'POST'])
+def edit_fbplayer():
+    """Foosball edit player page
+
+    Returns:
+        displays foosball edit player page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        previous_player = flask.request.form['previous_player'].encode('utf-8')
+
+        first_quote = previous_player.find('"')
+        second_quote = previous_player.find('"', first_quote + 1)
+        previous_player = (previous_player[:first_quote - 1],
+            previous_player[second_quote + 2:],
+            previous_player[first_quote + 1:second_quote])
+
+        previous_player = {'previous_first_name': previous_player[0],
+                           'previous_last_name': previous_player[1],
+                           'previous_nickname': previous_player[2]}
+        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+               'last_name': flask.request.form['last_name'].encode('utf-8'),
+               'nickname': flask.request.form['nickname'].encode('utf-8')}
+
+        try:
+            DB_MANAGER.edit_player(previous_player, new_player)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('editfbplayer.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('editfbplayer.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('editfbplayer.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Player successfully edited'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('fbplayer.html', message=message, players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('editfbplayer.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/editmkplayer.html', methods=['GET', 'POST'])
+def edit_mkplayer():
+    """Mario Kart edit player page
+
+    Returns:
+        displays mario kart edit player page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        previous_player = flask.request.form['previous_player'].encode('utf-8')
+
+        first_quote = previous_player.find('"')
+        second_quote = previous_player.find('"', first_quote + 1)
+        previous_player = (previous_player[:first_quote - 1],
+            previous_player[second_quote + 2:],
+            previous_player[first_quote + 1:second_quote])
+
+        previous_player = {'previous_first_name': previous_player[0],
+                           'previous_last_name': previous_player[1],
+                           'previous_nickname': previous_player[2]}
+        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+               'last_name': flask.request.form['last_name'].encode('utf-8'),
+               'nickname': flask.request.form['nickname'].encode('utf-8')}
+
+        try:
+            DB_MANAGER.edit_player(previous_player, new_player)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('editmkplayer.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('editmkplayer.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('editmkplayer.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Player successfully edited'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('mkplayer.html', message=message, players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('editmkplayer.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/editmpplayer.html', methods=['GET', 'POST'])
+def edit_mpplayer():
+    """Mario party edit player page
+
+    Returns:
+        displays mario party edit player page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        previous_player = flask.request.form['previous_player'].encode('utf-8')
+
+        first_quote = previous_player.find('"')
+        second_quote = previous_player.find('"', first_quote + 1)
+        previous_player = (previous_player[:first_quote - 1],
+            previous_player[second_quote + 2:],
+            previous_player[first_quote + 1:second_quote])
+
+        previous_player = {'previous_first_name': previous_player[0],
+                           'previous_last_name': previous_player[1],
+                           'previous_nickname': previous_player[2]}
+        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+               'last_name': flask.request.form['last_name'].encode('utf-8'),
+               'nickname': flask.request.form['nickname'].encode('utf-8')}
+
+        try:
+            DB_MANAGER.edit_player(previous_player, new_player)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('editmpplayer.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('editmpplayer.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('editmpplayer.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Player successfully edited'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('mpplayer.html', message=message, players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('editmpplayer.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
+@FRONTEND.route('/editssplayer.html', methods=['GET', 'POST'])
+def edit_ssplayer():
+    """Super smash edit player page
+
+    Returns:
+        displays super smash edit player page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        previous_player = flask.request.form['previous_player'].encode('utf-8')
+
+        first_quote = previous_player.find('"')
+        second_quote = previous_player.find('"', first_quote + 1)
+        previous_player = (previous_player[:first_quote - 1],
+            previous_player[second_quote + 2:],
+            previous_player[first_quote + 1:second_quote])
+
+        previous_player = {'previous_first_name': previous_player[0],
+                           'previous_last_name': previous_player[1],
+                           'previous_nickname': previous_player[2]}
+        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+               'last_name': flask.request.form['last_name'].encode('utf-8'),
+               'nickname': flask.request.form['nickname'].encode('utf-8')}
+
+        try:
+            DB_MANAGER.edit_player(previous_player, new_player)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('editssplayer.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('editssplayer.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('editssplayer.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Player successfully edited'
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('ssplayer.html', message=message, players=players)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('editssplayer.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
 def setup_argparser():
     """ Creates Elo Frontend argument parser
 
