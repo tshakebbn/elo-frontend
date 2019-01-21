@@ -1017,7 +1017,7 @@ def main():
         pass
 
     try:
-        FRONTEND.run(port=config.get('options', 'port'), host=config.get('options', 'host'))
+        FRONTEND.run(debug=True, port=config.get('options', 'port'), host=config.get('options', 'host'))
     except ConfigParser.NoSectionError:
         traceback.print_exc()
         sys.exit("Aborting. Missing section in config file")
