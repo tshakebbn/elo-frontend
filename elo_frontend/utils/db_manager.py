@@ -667,6 +667,19 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
 {3}, {4}, {5}, {6}, {7}, {8})".format(first_name, last_name, nickname, fb_offense_rating_id,
                                       fb_defense_rating_id, mk_ind_rating_id, mp_ind_rating_id,
                                       ss_ind_rating_id, pp_ind_rating_id))
+            player_id = cursor.lastrowid
+            cursor.execute("INSERT INTO pp_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(pp_ind_rating_id, player_id))
+            cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(ss_ind_rating_id, player_id))
+            cursor.execute("INSERT INTO mp_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(mp_ind_rating_id, player_id))
+            cursor.execute("INSERT INTO mk_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(mk_ind_rating_id, player_id))
+            cursor.execute("INSERT INTO fb_defense_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(fb_defense_rating_id, player_id))
+            cursor.execute("INSERT INTO fb_offense_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(fb_offense_rating_id, player_id))
             self._db_conn.commit()
 
         except MySQLdb.OperationalError:
@@ -1543,6 +1556,9 @@ least one character")
             raise exceptions.DBValueError("Second team member must\
  be complete")
 
+        if member_one == member_two:
+            raise exceptions.DBValueError("Team members must be different players")
+
         if not self.check_if_team_exists(team_name=team_name):
             raise exceptions.DBValueError("Team already exists")
 
@@ -1553,11 +1569,24 @@ least one character")
         try:
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
-            rating_id = self.create_new_default_rating()
-            cursor.execute("INSERT INTO team (team_name, rating) VALUES \
-('{0}', {1})".format(team_name, rating_id))
+            fb_rating_id = self.create_new_default_rating()
+            mk_rating_id = self.create_new_default_rating()
+            mp_rating_id = self.create_new_default_rating()
+            ss_rating_id = self.create_new_default_rating()
+            cursor.execute("INSERT INTO team (team_name, fb_team_rating, mk_team_rating, \
+mp_team_rating, ss_team_rating) VALUES ('{0}', {1}, {2}, {3}, {4})".format(
+    team_name, fb_rating_id, mk_rating_id, mp_rating_id, ss_rating_id))
 
             team_id = cursor.lastrowid
+
+            cursor.execute("INSERT INTO fb_team_rating_hist (rating, team) VALUES ({0}, {1}\
+)".format(fb_rating_id, team_id))
+            cursor.execute("INSERT INTO mk_team_rating_hist (rating, team) VALUES ({0}, {1}\
+)".format(mk_rating_id, team_id))
+            cursor.execute("INSERT INTO mp_team_rating_hist (rating, team) VALUES ({0}, {1}\
+)".format(mp_rating_id, team_id))
+            cursor.execute("INSERT INTO ss_team_rating_hist (rating, team) VALUES ({0}, {1}\
+)".format(ss_rating_id, team_id))
 
             cursor.execute("INSERT INTO player_team_xref (player, team) \
 VALUES ((SELECT player_id FROM player WHERE first_name = '{0}' AND last_name \

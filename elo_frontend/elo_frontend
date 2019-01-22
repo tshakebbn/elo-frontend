@@ -874,7 +874,7 @@ def edit_ssplayer():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
-@FRONTEND.route('/addfbteam', methods=['GET', 'POST'])
+@FRONTEND.route('/addfbteam.html', methods=['GET', 'POST'])
 def add_fbteam():
     """Foosball add team page
 
