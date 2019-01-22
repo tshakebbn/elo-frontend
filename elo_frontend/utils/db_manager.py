@@ -1428,8 +1428,10 @@ exists in database")
         try:
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
-            cursor.execute("UPDATE team SET team_name = {0} WHERE team_name = {1}".format(
-                new_team, previous_team))
+            cursor.execute("SELECT team_id FROM team WHERE team_name = {0}".format(previous_team))
+            team_id = cursor.fetchall()[0]
+            cursor.execute("UPDATE team SET team_name = {0} WHERE team_id = {1}".format(
+                new_team, team_id))
             self._db_conn.commit()
 
         except MySQLdb.OperationalError:
