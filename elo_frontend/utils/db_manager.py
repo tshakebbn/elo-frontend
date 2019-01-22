@@ -719,7 +719,7 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
 
             for existing_team in teams:
                 if team_name == existing_team:
-                    return False
+                    return True
 
         except MySQLdb.OperationalError:
             self._logger.error("MySQL operational error occured")
@@ -732,7 +732,7 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
             raise exceptions.DBSyntaxError("MySQL syntax error")
 
         else:
-            return True
+            return False
 
     def check_if_players_on_team(self, members):
         """Method to check if players are already on a team
@@ -1420,7 +1420,7 @@ exists in database")
             raise exceptions.DBValueError("Team name must be at \
 least one character")
 
-        if not self.check_if_team_exists(new_team):
+        if self.check_if_team_exists(new_team):
             raise exceptions.DBValueError("Name you are trying to change to already \
 exists in database")
 
@@ -1561,7 +1561,7 @@ least one character")
         if member_one == member_two:
             raise exceptions.DBValueError("Team members must be different players")
 
-        if not self.check_if_team_exists(team_name=team_name):
+        if self.check_if_team_exists(team_name=team_name):
             raise exceptions.DBValueError("Team already exists")
 
         if self.check_if_players_on_team((member_one, member_two)):
