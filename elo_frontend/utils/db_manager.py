@@ -718,7 +718,7 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
             teams = cursor.fetchall()
 
             for existing_team in teams:
-                if team_name == existing_team:
+                if team_name == existing_team[0]:
                     return True
 
         except MySQLdb.OperationalError:
@@ -1428,10 +1428,9 @@ exists in database")
         try:
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
-            cursor.execute("SELECT team_id FROM team WHERE team_name = {0}".format(previous_team))
-            team_id = cursor.fetchall()[0]
-            cursor.execute("UPDATE team SET team_name = {0} WHERE team_id = {1}".format(
-                new_team, team_id))
+            cursor.execute("SELECT team_id FROM team WHERE team_name = '{0}'".format(previous_team))
+            team_id = cursor.fetchall()[0][0]
+            cursor.execute("UPDATE team SET team_name = '{0}' WHERE team_id = {1}".format(new_team, team_id))
             self._db_conn.commit()
 
         except MySQLdb.OperationalError:
