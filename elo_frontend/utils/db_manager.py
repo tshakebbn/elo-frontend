@@ -1479,8 +1479,8 @@ FROM player WHERE player_id = {0}".format(player[0]))
 
                     intermediate_teams = intermediate_teams + (first_name,
                         last_name, nickname)
-                    intermediate_teams = intermediate_teams + (timestamp.strftime('%Y-%m-%d'),)
 
+                intermediate_teams = intermediate_teams + (timestamp.strftime('%Y-%m-%d'),)
                 all_teams = all_teams + (intermediate_teams,)
                 del intermediate_teams
 
