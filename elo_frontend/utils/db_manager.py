@@ -781,7 +781,7 @@ team = {0}".format(team[0]))
                                     second_player = True
                             loop_count = loop_count + 1
                         if first_player and second_player:
-                            return team
+                            return team[0]
 
         except MySQLdb.OperationalError:
             self._logger.error("MySQL operational error occured")
