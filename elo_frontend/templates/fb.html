@@ -155,7 +155,39 @@
                 <p class="card-category">All Time</p>
               </div>
               <div class="card-body ">
-                <canvas id=chartHours width="400" height="100"></canvas>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead class="text-primary">
+                      <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Rating</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for first_name,
+                        last_name, nickname, position, rank, wins, losses in individual_ranks %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ first_name }} "{{ nickname }}" {{ last_name }}</td>
+                        <td>{{ position }}</td>
+                        <td>{{ rank * 100 }}</td>
+                        <td>{{ wins }}</td>
+                        <td>{{ losses }}</td>
+                        <td>
+                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
+                            <i class="fa fa-user"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div class="card-footer ">
                 <hr>
@@ -172,7 +204,38 @@
                 <p class="card-category">All Time</p>
               </div>
               <div class="card-body ">
-                <canvas id=chartHours width="400" height="100"></canvas>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead class="text-primary">
+                      <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Players</th>
+                        <th>Rating</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for team_name,
+                        rank, wins, losses, player_one, player_two in team_ranks %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td data-toggle="tooltip" title="{{ player_one }} and {{ player_two }}">{{ team_name }}</td>
+                        <td>{{ rank * 100 }}</td>
+                        <td>{{ wins }}</td>
+                        <td>{{ losses }}</td>
+                        <td>
+                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
+                            <i class="fa fa-user"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div class="card-footer ">
                 <hr>

@@ -764,7 +764,6 @@ first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
             cursor.execute("SELECT team FROM player_team_xref WHERE \
 player = {0}".format(player_ids[0]))
             teams = cursor.fetchall()
-            team_found = False
             for team in teams:
                 cursor.execute("SELECT player FROM player_team_xref WHERE \
 team = {0}".format(team[0]))
@@ -782,8 +781,7 @@ team = {0}".format(team[0]))
                                     second_player = True
                             loop_count = loop_count + 1
                         if first_player and second_player:
-                            team_found = True
-                            return team_found
+                            return team
 
         except MySQLdb.OperationalError:
             self._logger.error("MySQL operational error occured")
@@ -796,7 +794,7 @@ team = {0}".format(team[0]))
             raise exceptions.DBSyntaxError("MySQL syntax error")
 
         else:
-            return team_found
+            return False
 
     def check_if_player_exists(self, first_name, last_name, nickname):
         """Method to check if player currently exists in database
@@ -1048,6 +1046,213 @@ player_id = {1}".format(new_rating_id, loser_player_id))
         else:
             pass
 
+    def add_fbresult(self, offense_winner, defense_winner, offense_loser,
+        defense_loser):
+        """Method to add a foosball result to database
+
+        Args:
+            offense_winner(tup):    offense_winner
+            defense_winner (tup):   defense_winner
+            offense_loser (tup):    offense_loser
+            defense_loser (tup):    defense_loser
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(offense_winner) != 3:
+            raise exceptions.DBValueError("Offense winner must\
+ be complete")
+
+        if len(defense_winner) != 3:
+            raise exceptions.DBValueError("Defense winner must\
+ be complete")
+
+        if len(offense_loser) != 3:
+            raise exceptions.DBValueError("Offense loser must\
+ be complete")
+
+        if len(defense_loser) != 3:
+            raise exceptions.DBValueError("Defense loser must\
+ be complete")
+
+        self._logger.debug("Adding fb result to database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("INSERT INTO fb_result (offense_winner, \
+defense_winner, offense_loser, defense_loser) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
+= '{3}' AND last_name = '{4}' AND nickname = '{5}'), (SELECT player_id FROM \
+player WHERE first_name = '{6}' AND last_name = '{7}' AND nickname = '{8}'), \
+(SELECT player_id FROM player WHERE first_name = '{9}' AND last_name = '{10}' \
+AND nickname = '{11}'))".format(offense_winner[0],
+                offense_winner[1], offense_winner[2], defense_winner[0],
+                defense_winner[1], defense_winner[2], offense_loser[0],
+                offense_loser[1], offense_loser[2], defense_loser[0],
+                defense_loser[1], defense_loser[2]))
+
+            self._logger.debug("Updating fb ratings")
+            cursor.execute("SELECT player_id, fb_offense_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                offense_winner[0], offense_winner[1], offense_winner[2]))
+            offense_winner_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            offense_winner_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            cursor.execute("SELECT player_id, fb_defense_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                defense_winner[0], defense_winner[1], defense_winner[2]))
+            defense_winner_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            defense_winner_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            cursor.execute("SELECT player_id, fb_offense_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                offense_loser[0], offense_loser[1], offense_loser[2]))
+            offense_loser_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            offense_loser_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            cursor.execute("SELECT player_id, fb_defense_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                defense_loser[0], defense_loser[1], defense_loser[2]))
+            defense_loser_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            defense_loser_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            (new_offense_winner_rating, new_defense_winner_rating), \
+            (new_offense_loser_rating, new_defense_loser_rating) = \
+            trueskill.rate([(offense_winner_rating, defense_winner_rating),
+                (offense_loser_rating, defense_loser_rating)], ranks=[0, 1])
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_offense_winner_rating.mu, new_offense_winner_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set fb_offense_rating = {0} where \
+player_id = {1}".format(new_rating_id, offense_winner_player_id))
+            cursor.execute("INSERT INTO fb_offense_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, offense_winner_player_id))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_defense_winner_rating.mu, new_defense_winner_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set fb_defense_rating = {0} where \
+player_id = {1}".format(new_rating_id, defense_winner_player_id))
+            cursor.execute("INSERT INTO fb_defense_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, defense_winner_player_id))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_offense_loser_rating.mu, new_offense_loser_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set fb_offense_rating = {0} where \
+player_id = {1}".format(new_rating_id, offense_loser_player_id))
+            cursor.execute("INSERT INTO fb_offense_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, offense_loser_player_id))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_defense_loser_rating.mu, new_defense_loser_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set fb_defense_rating = {0} where \
+player_id = {1}".format(new_rating_id, defense_loser_player_id))
+            cursor.execute("INSERT INTO fb_defense_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, defense_loser_player_id))
+
+            self._logger.debug("Update foosball team ratings")
+            # check if winners are on a team together
+            winning_team = self.check_if_players_on_team(
+                (offense_winner,defense_winner))
+
+            if not winning_team:
+                # create a new team
+                winning_team = self.add_fb_team(team_name="{0} & {1}\
+".format(offense_winner[0], defense_winner[0]), member_one=offense_winner,
+                    member_two=defense_winner)
+
+            # check if losers are on a team together
+            losing_team = self.check_if_players_on_team(
+                (offense_loser, defense_loser))
+
+            if not losing_team:
+                # create a new team
+                losing_team = self.add_fb_team(team_name="{0} & {1}\
+".format(offense_loser[0], defense_loser[0]), member_one=offense_loser,
+                    member_two=defense_loser)
+
+            # get ratings
+            cursor.execute("SELECT fb_team_rating from team WHERE team_id \
+= {0}".format(winning_team))
+            winning_team_rating_id = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT fb_team_rating from team WHERE team_id \
+= {0}".format(losing_team))
+            losing_team_rating_id = cursor.fetchone()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(winning_team_rating_id))
+            mu, sigma = cursor.fetchall()[0]
+            winning_team_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(losing_team_rating_id))
+            mu, sigma = cursor.fetchall()[0]
+            losing_team_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            new_winning_team_rating, new_losing_team_rating = \
+            trueskill.rate_1vs1(winning_team_rating, losing_team_rating)
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_winning_team_rating.mu, new_winning_team_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE team SET fb_team_rating = {0} where \
+team_id = {1}".format(new_rating_id, winning_team))
+            cursor.execute("INSERT INTO fb_team_rating_hist (rating, team) VALUES ({0}, {1}\
+)".format(new_rating_id, winning_team))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_losing_team_rating.mu, new_losing_team_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE team SET fb_team_rating = {0} where \
+team_id = {1}".format(new_rating_id, losing_team))
+            cursor.execute("INSERT INTO fb_team_rating_hist (rating, team) VALUES ({0}, {1}\
+)".format(new_rating_id, losing_team))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def delete_last_ppresult(self,):
         """Method to delete last ping pong result from database
 
@@ -1057,8 +1262,6 @@ player_id = {1}".format(new_rating_id, loser_player_id))
             DBSyntaxError:      invalid database programming statement
 
         """
-
-        # check if there is at least one pp result
 
         self._logger.debug("Deleting last pp result from database")
         try:
@@ -1089,6 +1292,133 @@ player_id = {1}".format(winner_previous_rating_id, winner_player_id))
             cursor.execute("DELETE FROM pp_ind_rating_hist WHERE rating = {0}".format(loser_new_rating_id))
             # delete result from pp_result
             cursor.execute("DELETE FROM pp_result WHERE result_id = {0}".format(result_id))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
+    def delete_last_fbresult(self,):
+        """Method to delete last foosball result from database
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Deleting last fb result from database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, offense_winner, defense_winner, offense_loser, \
+defense_loser FROM fb_result ORDER BY time \
+DESC LIMIT 1")
+            results = cursor.fetchall()
+            result_id = results[0][0]
+            offense_winner_player_id = results[0][1]
+            defense_winner_player_id = results[0][2]
+            offense_loser_player_id = results[0][3]
+            defense_loser_player_id = results[0][4]
+
+            # revert from fb_ind_rating_hist
+            cursor.execute("SELECT rating FROM fb_offense_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(offense_winner_player_id))
+            results = cursor.fetchall()
+            offense_winner_new_rating_id = results[0][0]
+            offense_winner_previous_rating_id = results[1][0]
+            cursor.execute("SELECT rating FROM fb_defense_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(defense_winner_player_id))
+            results = cursor.fetchall()
+            defense_winner_new_rating_id = results[0][0]
+            defense_winner_previous_rating_id = results[1][0]
+            cursor.execute("SELECT rating FROM fb_offense_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(offense_loser_player_id))
+            results = cursor.fetchall()
+            offense_loser_new_rating_id = results[0][0]
+            offense_loser_previous_rating_id = results[1][0]
+            cursor.execute("SELECT rating FROM fb_defense_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(defense_loser_player_id))
+            results = cursor.fetchall()
+            defense_loser_new_rating_id = results[0][0]
+            defense_loser_previous_rating_id = results[1][0]
+            # update player ratings in player
+            cursor.execute("UPDATE player SET fb_offense_rating = {0} WHERE \
+player_id = {1}".format(offense_winner_previous_rating_id, offense_winner_player_id))
+            cursor.execute("UPDATE player SET fb_defense_rating = {0} WHERE \
+player_id = {1}".format(defense_winner_previous_rating_id, defense_winner_player_id))
+            cursor.execute("UPDATE player SET fb_offense_rating = {0} WHERE \
+player_id = {1}".format(offense_loser_previous_rating_id, offense_loser_player_id))
+            cursor.execute("UPDATE player SET fb_defense_rating = {0} WHERE \
+player_id = {1}".format(defense_loser_previous_rating_id, defense_loser_player_id))
+            cursor.execute("DELETE FROM fb_offense_rating_hist WHERE rating = {0}".format(offense_winner_new_rating_id))
+            cursor.execute("DELETE FROM fb_defense_rating_hist WHERE rating = {0}".format(defense_winner_new_rating_id))
+            cursor.execute("DELETE FROM fb_offense_rating_hist WHERE rating = {0}".format(offense_loser_new_rating_id))
+            cursor.execute("DELETE FROM fb_defense_rating_hist WHERE rating = {0}".format(defense_loser_new_rating_id))
+
+            # get team ids
+            cursor.execute("SELECT first_name, last_name, nickname FROM player WHERE player_id \
+= {0}".format(offense_winner_player_id))
+            results = cursor.fetchall()[0]
+            offense_winner_first_name = results[0]
+            offense_winner_last_name = results[1]
+            offense_winner_nickname = results[2]
+            cursor.execute("SELECT first_name, last_name, nickname FROM player WHERE player_id \
+= {0}".format(defense_winner_player_id))
+            results = cursor.fetchall()[0]
+            defense_winner_first_name = results[0]
+            defense_winner_last_name = results[1]
+            defense_winner_nickname = results[2]
+            winner_team_id = self.check_if_players_on_team(
+                ((offense_winner_first_name, offense_winner_last_name, offense_winner_nickname),
+                 (defense_winner_first_name, defense_winner_last_name, defense_winner_nickname)))
+            cursor.execute("SELECT first_name, last_name, nickname FROM player WHERE player_id \
+= {0}".format(offense_loser_player_id))
+            results = cursor.fetchall()[0]
+            offense_loser_first_name = results[0]
+            offense_loser_last_name = results[1]
+            offense_loser_nickname = results[2]
+            cursor.execute("SELECT first_name, last_name, nickname FROM player WHERE player_id \
+= {0}".format(defense_loser_player_id))
+            results = cursor.fetchall()[0]
+            defense_loser_first_name = results[0]
+            defense_loser_last_name = results[1]
+            defense_loser_nickname = results[2]
+            loser_team_id = self.check_if_players_on_team(
+                ((offense_loser_first_name, offense_loser_last_name, offense_loser_nickname),
+                 (defense_loser_first_name, defense_loser_last_name, defense_loser_nickname)))
+            #revert from fb_team_rating_hist
+            cursor.execute("SELECT rating FROM fb_team_rating_hist WHERE team = {0} ORDER \
+BY time DESC LIMIT 2".format(winner_team_id))
+            results = cursor.fetchall()
+            winner_new_rating_id = results[0][0]
+            winner_previous_rating_id = results[1][0]
+            cursor.execute("SELECT rating FROM fb_team_rating_hist WHERE team = {0} ORDER \
+BY time DESC LIMIT 2".format(loser_team_id))
+            results = cursor.fetchall()
+            loser_new_rating_id = results[0][0]
+            loser_previous_rating_id = results[1][0]
+
+            # update team ratings in team
+            cursor.execute("UPDATE team SET fb_team_rating = {0} WHERE \
+team_id = {1}".format(winner_previous_rating_id, winner_team_id))
+            cursor.execute("UPDATE team SET fb_team_rating = {0} WHERE \
+team_id = {1}".format(loser_previous_rating_id, loser_team_id))
+            cursor.execute("DELETE FROM fb_team_rating_hist WHERE rating = {0}".format(winner_new_rating_id))
+            cursor.execute("DELETE FROM fb_team_rating_hist WHERE rating = {0}".format(loser_new_rating_id))
+
+            # delete result from fb_result
+            cursor.execute("DELETE FROM fb_result WHERE result_id = {0}".format(result_id))
             self._db_conn.commit()
 
         except MySQLdb.OperationalError:
@@ -1162,6 +1492,76 @@ player WHERE player_id = {0}".format(loser_id))
         else:
             return all_results
 
+    def get_all_fbresults(self):
+        """Method to get all fb results from database
+
+        Returns:
+            all fb results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        all_results = ()
+        self._logger.debug("Getting all foosball results")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, offense_winner, defense_winner, offense_loser, \
+defense_loser, time FROM fb_result ORDER BY time DESC")
+            results = cursor.fetchall()
+
+            for result_id, offense_winner_id, defense_winner_id, offense_loser_id, defense_loser_id, timestamp in results:
+                intermediate_results = ()
+
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(offense_winner_id))
+                offense_winner = cursor.fetchall()
+                first_name_offense_winner, last_name_offense_winner, \
+                    nickname_offense_winner = offense_winner[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(defense_winner_id))
+                defense_winner = cursor.fetchall()
+                first_name_defense_winner, last_name_defense_winner, \
+                    nickname_defense_winner = defense_winner[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(offense_loser_id))
+                offense_loser = cursor.fetchall()
+                first_name_offense_loser, last_name_offense_loser, \
+                    nickname_offense_loser = offense_loser[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(defense_loser_id))
+                defense_loser = cursor.fetchall()
+                first_name_defense_loser, last_name_defense_loser, \
+                    nickname_defense_loser = defense_loser[0]
+
+                intermediate_results = intermediate_results + \
+                    (result_id, first_name_offense_winner, last_name_offense_winner,
+                     nickname_offense_winner, first_name_defense_winner, last_name_defense_winner,
+                     nickname_defense_winner, first_name_offense_loser,
+                     last_name_offense_loser, nickname_offense_loser, first_name_defense_loser,
+                     last_name_defense_loser, nickname_defense_loser,
+                     timestamp.strftime('%Y-%m-%d'))
+
+                all_results = all_results + (intermediate_results,)
+                del intermediate_results
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return all_results
+
     def get_total_ppresults(self):
         """Method to get pp result count from database
 
@@ -1180,6 +1580,39 @@ player WHERE player_id = {0}".format(loser_id))
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
             cursor.execute("SELECT COUNT(result_id) FROM pp_result")
+            count = cursor.fetchone()[0]
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return count
+
+    def get_total_fbresults(self):
+        """Method to get fb result count from database
+
+        Returns:
+            total number of results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting foosball results count")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT COUNT(result_id) FROM fb_result")
             count = cursor.fetchone()[0]
 
         except MySQLdb.OperationalError:
@@ -1236,6 +1669,160 @@ pp_loser = {0}".format(player_id))
 
                 intermediate_rank = (first_name, last_name, nickname, round(ind_rank, 4),
                                      win_count, loss_count)
+                ranks.append(intermediate_rank)
+                del intermediate_rank
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return ranks
+
+    def get_fb_ind_rankings(self):
+        """Method to get foosball individual rankings from database
+
+        Returns:
+            individual rank list
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        ranks = []
+        self._logger.debug("Getting foosball individual rankings")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT player_id, first_name, last_name, \
+nickname FROM player")
+            players = cursor.fetchall()
+
+            for player_id, first_name, last_name, nickname in players:
+                cursor.execute("SELECT fb_offense_rating, fb_defense_rating FROM \
+player WHERE player_id = {0}".format(player_id))
+                offense_rating, defense_rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(offense_rating))
+                mu, sigma = cursor.fetchall()[0]
+
+                offense_rank = float(mu) - (3 * float(sigma))
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(defense_rating))
+                mu, sigma = cursor.fetchall()[0]
+
+                defense_rank = float(mu) - (3 * float(sigma))
+
+                cursor.execute("SELECT COUNT(result_id) FROM fb_result WHERE \
+offense_winner = {0}".format(player_id))
+                offense_win_count = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(result_id) FROM fb_result WHERE \
+defense_winner = {0}".format(player_id))
+                defense_win_count = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(result_id) FROM fb_result WHERE \
+offense_loser = {0}".format(player_id))
+                offense_lose_count = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(result_id) FROM fb_result WHERE \
+defense_loser = {0}".format(player_id))
+                defense_lose_count = cursor.fetchone()[0]
+
+                intermediate_rank = (first_name, last_name, nickname,
+                    'Offense', round(offense_rank, 4), offense_win_count,
+                    offense_lose_count)
+                ranks.append(intermediate_rank)
+                del intermediate_rank
+                intermediate_rank = (first_name, last_name, nickname,
+                    'Defense', round(defense_rank, 4), defense_win_count,
+                    defense_lose_count)
+                ranks.append(intermediate_rank)
+                del intermediate_rank
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return ranks
+
+    def get_fb_team_rankings(self):
+        """Method to get fb team rankings from database
+
+        Returns:
+            team rank list
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        ranks = []
+        self._logger.debug("Getting foosball team rankings")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT team_id, team_name FROM team")
+            teams = cursor.fetchall()
+
+            for team_id, team_name in teams:
+                cursor.execute("SELECT fb_team_rating FROM \
+team WHERE team_id = {0}".format(team_id))
+                team_rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(team_rating[0]))
+                mu, sigma = cursor.fetchall()[0]
+
+                team_rank = float(mu) - (3 * float(sigma))
+
+                # get player_ids
+                cursor.execute("SELECT player from player_team_xref \
+WHERE team = {0}".format(team_id))
+                players = cursor.fetchall()
+                player_one = players[0]
+                player_two = players[1]
+
+                cursor.execute("SELECT first_name FROM player WHERE \
+player_id = {0}".format(player_one[0]))
+                player_one_name = cursor.fetchone()[0]
+
+                cursor.execute("SELECT first_name FROM player WHERE \
+player_id = {0}".format(player_two[0]))
+                player_two_name = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(result_id) FROM fb_result WHERE \
+(offense_winner = {0} AND defense_winner = {1}) OR (offense_winner = {1} \
+AND defense_winner = {0})".format(player_one[0], player_two[0]))
+                team_win_count = cursor.fetchone()[0]
+
+                cursor.execute("SELECT COUNT(result_id) FROM fb_result WHERE \
+(offense_loser = {0} AND defense_loser = {1}) OR (offense_loser = {1} \
+AND defense_loser = {0})".format(player_one[0], player_two[0]))
+                team_loss_count = cursor.fetchone()[0]
+
+                intermediate_rank = (team_name, round(team_rank, 4),
+                    team_win_count, team_loss_count, player_one_name,
+                    player_two_name)
                 ranks.append(intermediate_rank)
                 del intermediate_rank
 
@@ -1612,7 +2199,7 @@ VALUES ((SELECT player_id FROM player WHERE first_name = '{0}' AND last_name \
             raise exceptions.DBSyntaxError("MySQL syntax error")
 
         else:
-            pass
+            return team_id
 
     def _configure(self):
 

@@ -68,16 +68,6 @@
 </div> -->
       <div class="content">
 
-        {% if message %}
-        <script>
-          sweetAlert({
-            type: 'success',
-            title: 'Success!',
-            text: "{{ message }}",
-          });
-        </script>
-        {% endif %}
-
         {% if error %}
         <script>
           sweetAlert({
@@ -89,55 +79,52 @@
         {% endif %}
 
         <div class="row">
-          <div class="col-md-12">
-            <a href="{{ url_for('add_fbresult') }}"><button class="btn btn-primary btn-round">
-              Add Result
-            </button></a>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="card ">
-              <div class="card-header ">
-                <h5 class="card-title">Results</h5>
-              </div>
-              <div class="card-body ">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead class="text-primary">
-                      <tr>
-                        <th>#</th>
-                        <th>Offensive Winner</th>
-                        <th>Defensive Winner</th>
-                        <th>Offensive Loser</th>
-                        <th>Defensive Loser</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for result_id, first_name_offense_winner, last_name_offense_winner, nickname_offense_winner, first_name_defense_winner, last_name_defense_winner, nickname_defense_winner, first_name_offense_loser, last_name_offense_loser, nickname_offense_loser, first_name_defense_loser, last_name_defense_loser, nickname_defense_loser, date in results%}
-                      <tr>
-                        <td>{{ result_id }}</td>
-                        <td>{{ first_name_offense_winner }} "{{  nickname_offense_winner }}" {{last_name_offense_winner }}</td>
-                        <td>{{ first_name_defense_winner }} "{{  nickname_defense_winner }}" {{last_name_defense_winner }}</td>
-                        <td>{{ first_name_offense_loser }} "{{  nickname_offense_loser }}" {{last_name_offense_loser }}</td>
-                        <td>{{ first_name_defense_loser }} "{{  nickname_defense_loser }}" {{last_name_defense_loser }}</td>
-                        <td>{{ date }}</td>
-                        <td>
-                          <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
-                            <i class="fa fa-edit"></i>
-                          </button>
-                          <a href="{{ url_for('del_fbresult') }}"><button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
-                            <i class="fa fa-times"></i>
-                          </button></a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+          <div class="col-md-6">
+            <form action="{{ url_for('add_fbresult') }}" method="POST" class="form">
+              <div class="card ">
+                <div class="card-header ">
+                  <h5 class="card-title">Add Result</h5>
+                </div>
+                <div class="card-body">
+                  <div class="form-group has-label">
+                    <label for="offense_winner">Offensive Winner *</label>
+                    <select class="form-control" id="offense_winner" name="offense_winner" required="true">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="defense_winner">Defensive Winner *</label>
+                    <select class="form-control" id="defense_winner" name="defense_winner" required="true">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="offense_loser">Offensive Loser *</label>
+                    <select class="form-control" id="offense_loser" name="offense_loser" required="true">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="defense_loser">Defensive Loser *</label>
+                    <select class="form-control" id="defense_loser" name="defense_loser" required="true">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="category form-category">* Required fields</div>
+                </div>
+                <div class="card-footer text-center">
+                  <button type="submit" class="btn btn-primary btn-round">Submit</button>
                 </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
