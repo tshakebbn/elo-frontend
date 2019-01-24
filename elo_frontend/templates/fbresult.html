@@ -128,11 +128,14 @@
                           <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
                             <i class="fa fa-edit"></i>
                           </button>
+                          {% if loop.index == 1 %}
                           <a href="{{ url_for('del_fbresult') }}"><button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
                             <i class="fa fa-times"></i>
                           </button></a>
+                          {% endif %}
                         </td>
                       </tr>
+                      {% endfor %}
                     </tbody>
                   </table>
                 </div>
