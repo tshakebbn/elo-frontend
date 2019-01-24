@@ -1079,6 +1079,15 @@ player_id = {1}".format(new_rating_id, loser_player_id))
             raise exceptions.DBValueError("Defense loser must\
  be complete")
 
+        if offense_winner == defense_winner or offense_winner == offense_loser or offense_winner == defense_loser:
+            raise exceptions.DBValueError("Duplicate players in result")
+
+        if defense_winner == offense_loser or defense_winner == defense_loser:
+            raise exceptions.DBValueError("Duplicate players in result")
+
+        if offense_loser == defense_loser:
+            raise exceptions.DBValueError("Duplicate players in result")
+
         self._logger.debug("Adding fb result to database")
         try:
             self.check_if_db_connected()
