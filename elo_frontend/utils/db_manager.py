@@ -734,14 +734,15 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
         else:
             return False
 
-    def check_if_players_on_team(self, members):
-        """Method to check if players are already on a team
+    def check_if_two_players_on_team(self, member_one, member_two):
+        """Method to check if two players are already on a team
 
         Args:
-            members (tup):  tuple of player tuples
+            player_one (tup):    player one
+            player_two (tup):    player two
 
         Returns:
-            True/False if players are on team
+            Team if exists
 
         Raises:
             DBConnectionError:  database connection issues
@@ -754,34 +755,28 @@ ss_ind_rating, pp_ind_rating) VALUES ('{0}', '{1}', '{2}', \
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
 
-            player_ids = []
-            for first_name, last_name, nickname in members:
-                cursor.execute("SELECT player_id FROM player WHERE \
+            cursor.execute("SELECT player_id FROM player WHERE \
 first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
-                first_name, last_name, nickname))
-                player_ids.append(cursor.fetchone()[0])
+                member_one[0], member_one[1], member_one[2]))
+            player_one_id = cursor.fetchone()[0]
+
+            cursor.execute("SELECT player_id FROM player WHERE \
+first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                member_two[0], member_two[1], member_two[2]))
+            player_two_id = cursor.fetchone()[0]
 
             cursor.execute("SELECT team FROM player_team_xref WHERE \
-player = {0}".format(player_ids[0]))
+player = {0}".format(player_one_id))
             teams = cursor.fetchall()
+
+            #TODO will give false positive if members are on a team of three
             for team in teams:
                 cursor.execute("SELECT player FROM player_team_xref WHERE \
 team = {0}".format(team[0]))
                 players = cursor.fetchall()
-                if len(members) == 2:
-                    if len(players) == 2:
-                        first_player = False
-                        second_player = False
-                        loop_count = 0
-                        for player in players:
-                            if player[0] in player_ids:
-                                if loop_count == 0:
-                                    first_player = True
-                                elif loop_count == 1:
-                                    second_player = True
-                            loop_count = loop_count + 1
-                        if first_player and second_player:
-                            return team[0]
+                for player in players:
+                    if player[0] == player_two_id:
+                        return team[0]
 
         except MySQLdb.OperationalError:
             self._logger.error("MySQL operational error occured")
@@ -1189,8 +1184,8 @@ player_id = {1}".format(new_rating_id, defense_loser_player_id))
 
             self._logger.debug("Update foosball team ratings")
             # check if winners are on a team together
-            winning_team = self.check_if_players_on_team(
-                (offense_winner,defense_winner))
+            winning_team = self.check_if_two_players_on_team(
+                offense_winner, defense_winner)
 
             if not winning_team:
                 # create a new team
@@ -1199,8 +1194,8 @@ player_id = {1}".format(new_rating_id, defense_loser_player_id))
                     member_two=defense_winner)
 
             # check if losers are on a team together
-            losing_team = self.check_if_players_on_team(
-                (offense_loser, defense_loser))
+            losing_team = self.check_if_two_players_on_team(
+                offense_loser, defense_loser)
 
             if not losing_team:
                 # create a new team
@@ -1388,9 +1383,9 @@ player_id = {1}".format(defense_loser_previous_rating_id, defense_loser_player_i
             defense_winner_first_name = results[0]
             defense_winner_last_name = results[1]
             defense_winner_nickname = results[2]
-            winner_team_id = self.check_if_players_on_team(
-                ((offense_winner_first_name, offense_winner_last_name, offense_winner_nickname),
-                 (defense_winner_first_name, defense_winner_last_name, defense_winner_nickname)))
+            winner_team_id = self.check_if_two_players_on_team(
+                (offense_winner_first_name, offense_winner_last_name, offense_winner_nickname),
+                (defense_winner_first_name, defense_winner_last_name, defense_winner_nickname))
             cursor.execute("SELECT first_name, last_name, nickname FROM player WHERE player_id \
 = {0}".format(offense_loser_player_id))
             results = cursor.fetchall()[0]
@@ -1403,9 +1398,9 @@ player_id = {1}".format(defense_loser_previous_rating_id, defense_loser_player_i
             defense_loser_first_name = results[0]
             defense_loser_last_name = results[1]
             defense_loser_nickname = results[2]
-            loser_team_id = self.check_if_players_on_team(
-                ((offense_loser_first_name, offense_loser_last_name, offense_loser_nickname),
-                 (defense_loser_first_name, defense_loser_last_name, defense_loser_nickname)))
+            loser_team_id = self.check_if_two_players_on_team(
+                (offense_loser_first_name, offense_loser_last_name, offense_loser_nickname),
+                (defense_loser_first_name, defense_loser_last_name, defense_loser_nickname))
             #revert from fb_team_rating_hist
             cursor.execute("SELECT rating FROM fb_team_rating_hist WHERE team = {0} ORDER \
 BY time DESC LIMIT 2".format(winner_team_id))
@@ -2159,7 +2154,7 @@ least one character")
         if self.check_if_team_exists(team_name=team_name):
             raise exceptions.DBValueError("Team already exists")
 
-        if self.check_if_players_on_team((member_one, member_two)):
+        if self.check_if_two_players_on_team(member_one, member_two):
             raise exceptions.DBValueError("Players already on team together")
 
         self._logger.debug("Adding fb team to database")
