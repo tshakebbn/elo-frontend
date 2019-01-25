@@ -316,6 +316,7 @@ def fb_home():
 
     player_count = DB_MANAGER.get_total_players()
     team_count = DB_MANAGER.get_total_fb_teams()
+    game_count = DB_MANAGER.get_total_fbresults()
     individual_ranks = DB_MANAGER.get_fb_ind_rankings()
     individual_ranks = sorted(individual_ranks, key=lambda tup: tup[4],
         reverse=True)
@@ -324,7 +325,7 @@ def fb_home():
         reverse=True)
     return flask.render_template(
         'fb.html', player_count=player_count, team_count=team_count,
-        individual_ranks=individual_ranks, team_ranks=team_ranks)
+        individual_ranks=individual_ranks, team_ranks=team_ranks, game_count=game_count)
 
 @FRONTEND.route('/fbplayer.html')
 def fb_player():
