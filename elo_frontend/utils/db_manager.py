@@ -1885,7 +1885,9 @@ player WHERE player_id = {0}".format(second_id))
                     first_name_third, last_name_third, \
                         nickname_third = third[0]
                 except MySQLdb.OperationalError:
-                    third = ''
+                    first_name_third = ''
+                    last_name_third = ''
+                    nickname_third = ''
                 try:
                     cursor.execute("SELECT first_name, last_name, nickname FROM \
     player WHERE player_id = {0}".format(fourth_id))
@@ -1893,7 +1895,9 @@ player WHERE player_id = {0}".format(second_id))
                     first_name_fourth, last_name_fourth, \
                         nickname_fourth = fourth[0]
                 except MySQLdb.OperationalError:
-                    fourth = ''
+                    first_name_fourth = ''
+                    last_name_fourth = ''
+                    nickname_fourth = ''
 
                 intermediate_results = intermediate_results + \
                     (result_id, first_name_first, last_name_first,
