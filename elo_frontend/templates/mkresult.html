@@ -67,11 +67,32 @@
   
 </div> -->
       <div class="content">
+
+        {% if message %}
+        <script>
+          sweetAlert({
+            type: 'success',
+            title: 'Success!',
+            text: "{{ message }}",
+          });
+        </script>
+        {% endif %}
+
+        {% if error %}
+        <script>
+          sweetAlert({
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
+          });
+        </script>
+        {% endif %}
+
         <div class="row">
           <div class="col-md-12">
-            <button class="btn btn-primary btn-round">
+            <a href="{{ url_for('add_mkresult') }}"><button class="btn btn-primary btn-round">
               Add Result
-            </button>
+            </button></a>
           </div>
         </div>
         <div class="row">
@@ -96,23 +117,27 @@
                       </tr>
                     </thead>
                     <tbody>
+                      {% for result_id, first_name_first_place, last_name_first_place, nickname_first_place, first_name_second_place, last_name_second_place, nickname_second_place, first_name_third_place, last_name_third_place, nickname_third_place, first_name_fourth_place, last_name_fourth_place, nickname_fourth_place, course, date in results%}
                       <tr>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
+                        <td>{{ result_id }}</td>
+                        <td>{{ first_name_first_place }} "{{  nickname_first_place }}" {{last_name_first_place }}</td>
+                        <td>{{ first_name_second_place }} "{{  nickname_second_place }}" {{last_name_second_place }}</td>
+                        <td>{{ first_name_third_place }} "{{  nickname_third_place }}" {{last_name_third_place }}</td>
+                        <td>{{ first_name_fourth_place }} "{{  nickname_fourth_place }}" {{last_name_fourth_place }}</td>
+                        <td>{{ course }}</td>
+                        <td>{{ date }}</td>
                         <td>
                           <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
                             <i class="fa fa-edit"></i>
                           </button>
-                          <button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
+                          {% if loop.index == 1 %}
+                          <a href="{{ url_for('del_mkresult') }}"><button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
                             <i class="fa fa-times"></i>
-                          </button>
+                          </button></a>
+                          {% endif %}
                         </td>
                       </tr>
+                      {% endfor %}
                     </tbody>
                   </table>
                 </div>

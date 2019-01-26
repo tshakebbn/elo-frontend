@@ -132,7 +132,7 @@
                   <div class="col-7 col-md-8">
                     <div class="numbers">
                       <p class="card-category">Races</p>
-                      <p class="card-title">TBD
+                      <p class="card-title">{{ race_count }}
                         <p>
                     </div>
                   </div>
@@ -181,7 +181,39 @@
                 <p class="card-category">All Time</p>
               </div>
               <div class="card-body ">
-                <canvas id=chartHours width="400" height="100"></canvas>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead class="text-primary">
+                      <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Rating</th>
+                        <th>1sts</th>
+                        <th>2nds</th>
+                        <th>3rds</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for first_name,
+                        last_name, nickname, rank, firsts, seconds, thirds in individual_ranks %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ first_name }} "{{ nickname }}" {{ last_name }}</td>
+                        <td>{{ rank * 100 }}</td>
+                        <td>{{ firsts }}</td>
+                        <td>{{ seconds }}</td>
+                        <td>{{ thirds }}</td>
+                        <td>
+                          <button type="button" rel="tooltip" class="btn btn-info btn-icon btn-sm ">
+                            <i class="fa fa-user"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div class="card-footer ">
                 <hr>

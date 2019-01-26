@@ -1,0 +1,209 @@
+{% extends "dbtemplate.html" %}
+{% block body %}
+  <div class="wrapper ">
+    <div class="sidebar" data-color="white" data-active-color="danger">
+      <!--
+        Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red | yellow"
+    -->
+      <div class="logo">
+        <a href="{{ url_for('index') }}" class="simple-text logo-mini">
+          <div class="logo-image-small">
+            <img src="{{ url_for('static', filename='img/bbn-logo-small.png') }}">
+          </div>
+        </a>
+        <a href="{{ url_for('index') }}" class="simple-text logo-normal">
+          Elo Ratings
+        </a>
+      </div>
+      <div class="sidebar-wrapper">
+        <ul class="nav">
+          <li>
+            <a href="{{ url_for('mk_home') }}">
+              <i class="fa fa-tachometer" aria-hidden="true"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('mk_player') }}">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              <p>Players</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('mk_team') }}">
+              <i class="fa fa-users" aria-hidden="true"></i>
+              <p>Teams</p>
+            </a>
+          </li>
+          <li class="active ">
+            <a href="{{ url_for('mk_result') }}">
+              <i class="fa fa-desktop" aria-hidden="true"></i>
+              <p>Results</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('mk_stat') }}">
+              <i class="fa fa-area-chart" aria-hidden="true"></i>
+              <p>Statistics</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <a class="navbar-brand">Mario Kart</a>
+          </div>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+      <!-- <div class="panel-header panel-header-lg">
+  
+  <canvas id="bigDashboardChart"></canvas>
+  
+  
+</div> -->
+      <div class="content">
+
+        {% if error %}
+        <script>
+          sweetAlert({
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
+          });
+        </script>
+        {% endif %}
+
+        <div class="row">
+          <div class="col-md-6">
+            <form action="{{ url_for('add_mkresult') }}" method="POST" class="form">
+              <div class="card ">
+                <div class="card-header ">
+                  <h5 class="card-title">Add Result</h5>
+                </div>
+                <div class="card-body">
+                  <div class="form-group has-label">
+                    <label for="first_place">1st Place *</label>
+                    <select class="form-control" id="first_place" name="first_place" required="true">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="second_place">2nd Place *</label>
+                    <select class="form-control" id="second_place" name="second_place" required="true">
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="third_place">3rd Place *</label>
+                    <select class="form-control" id="third_place" name="third_place" required="true">
+                      <option>N/A</option>
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="fourth_place">4th Place *</label>
+                    <select class="form-control" id="fourth_place" name="fourth_place" required="true">
+                      <option>N/A</option>
+                      {% for first_name, last_name, nickname, time in players %}
+                      <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="form-group has-label">
+                    <label for="course">Course *</label>
+                    <select class="form-control" id="course" name="course" required="true">
+                      <option>Mario Kart Stadium</option>
+                      <option>Water Park</option>
+                      <option>Sweet Sweet Canyon</option>
+                      <option>Thwomp Ruins</option>
+                      <option>Mario Circuit</option>
+                      <option>Toad Harbor</option>
+                      <option>Twisted Mansion</option>
+                      <option>Shy Guy Falls</option>
+                      <option>Sunshine Airport</option>
+                      <option>Dolphin Shoals</option>
+                      <option>Electrodrome</option>
+                      <option>Mount Wario</option>
+                      <option>Cloudtop Cruise</option>
+                      <option>Bone-Dry Dunes</option>
+                      <option>Bowser's Castle</option>
+                      <option>Rainbow Road</option>
+                      <option>Yoshi Circuit</option>
+                      <option>Excitebike Arena</option>
+                      <option>Dragon Driftway</option>
+                      <option>Mute City</option>
+                      <option>Baby Park</option>
+                      <option>Cheese Land</option>
+                      <option>Wild Woods</option>
+                      <option>Animal Crossing</option>
+                      <option>Moo Moo Meadows</option>
+                      <option>Mario Circuit (GBA)</option>
+                      <option>Cheep Cheep Beach</option>
+                      <option>Toad's Turnpike</option>
+                      <option>Dry Dry Desert</option>
+                      <option>Donut Plains 3</option>
+                      <option>Royal Raceway</option>
+                      <option>DK Jungle</option>
+                      <option>Wario Stadium</option>
+                      <option>Sherbert Land</option>
+                      <option>Music Park</option>
+                      <option>Yoshi Valley</option>
+                      <option>Tick-Tock Clock</option>
+                      <option>Piranha Plant Slide</option>
+                      <option>Grumble Volcano</option>
+                      <option>Rainbow Road (N64)</option>
+                      <option>Wario's Gold Mine</option>
+                      <option>Rainbow Road (SNES)</option>
+                      <option>Ice Ice Outpost</option>
+                      <option>Hyrule Circuit</option>
+                      <option>Neo Bowser City</option>
+                      <option>Ribbon Road</option>
+                      <option>Super Bell Subway</option>
+                      <option>Big Blue</option>
+                    </select>
+                  </div>
+                  <div class="category form-category">* Required fields</div>
+                </div>
+                <div class="card-footer text-center">
+                  <button type="submit" class="btn btn-primary btn-round">Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <footer class="footer footer-black  footer-white ">
+        <div class="container-fluid">
+          <div class="row">
+            <nav class="footer-nav">
+              <ul>
+                <li>
+                  <a href="https://www.bbn.com" target="_blank">BBN Technologies</a>
+                </li>
+              </ul>
+            </nav>
+            <div class="credits ml-auto">
+              <span class="copyright">
+                ©
+                <script>
+                  document.write(new Date().getFullYear())
+                </script>, made with <i class="fa fa-heart heart"></i> by Creative Tim
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+{% endblock %}

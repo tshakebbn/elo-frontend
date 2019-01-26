@@ -93,7 +93,12 @@ def mk_home():
     """
 
     player_count = DB_MANAGER.get_total_players()
-    return flask.render_template('mk.html', player_count=player_count)
+    race_count = DB_MANAGER.get_total_mkresults()
+    individual_ranks = DB_MANAGER.get_mk_ind_rankings()
+    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3],
+        reverse=True)
+    return flask.render_template('mk.html', player_count=player_count, race_count=race_count,
+        individual_ranks=individual_ranks)
 
 @FRONTEND.route('/mkplayer.html')
 def mk_player():
@@ -127,7 +132,8 @@ def mk_result():
 
     """
 
-    return flask.render_template('mkresult.html')
+    results = DB_MANAGER.get_all_mkresults()
+    return flask.render_template('mkresult.html', results=results)
 
 @FRONTEND.route('/mkstat.html')
 def mk_stat():
@@ -664,6 +670,85 @@ def add_fbresult():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
+@FRONTEND.route('/addmkresult.html', methods=['GET', 'POST'])
+def add_mkresult():
+    """Mario Kart add result page
+
+    Returns:
+        displays mario kart add result page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        first_place = flask.request.form['first_place'].encode('utf-8')
+        second_place = flask.request.form['second_place'].encode('utf-8')
+        third_place = flask.request.form['third_place'].encode('utf-8')
+        fourth_place = flask.request.form['fourth_place'].encode('utf-8')
+        course = flask.request.form['course'].encode('utf-8')
+
+        first_quote = first_place.find('"')
+        second_quote = first_place.find('"', first_quote + 1)
+        final_first_place = (first_place[:first_quote - 1],
+            first_place[second_quote + 2:],
+            first_place[first_quote + 1:second_quote])
+
+        first_quote = second_place.find('"')
+        second_quote = second_place.find('"', first_quote + 1)
+        final_second_place = (second_place[:first_quote - 1],
+            second_place[second_quote + 2:],
+            second_place[first_quote + 1:second_quote])
+
+        if third_place == "N/A":
+            final_third_place = False
+        else:
+            first_quote = third_place.find('"')
+            second_quote = third_place.find('"', first_quote + 1)
+            final_third_place = (third_place[:first_quote - 1],
+                third_place[second_quote + 2:],
+                third_place[first_quote + 1:second_quote])
+
+        if fourth_place == "N/A":
+            final_fourth_place = False
+        else:
+            first_quote = fourth_place.find('"')
+            second_quote = fourth_place.find('"', first_quote + 1)
+            final_fourth_place = (fourth_place[:first_quote - 1],
+                fourth_place[second_quote + 2:],
+                fourth_place[first_quote + 1:second_quote])
+
+        try:
+            DB_MANAGER.add_mkresult(
+                first=final_first_place,
+                second=final_second_place,
+                third=final_third_place,
+                fourth=final_fourth_place,
+                course=course)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addmkresult.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('addmkresult.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('addmkresult.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Result successfully added'
+        results = DB_MANAGER.get_all_mkresults()
+        return flask.render_template('mkresult.html', message=message,
+                                     results=results)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addmkresult.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
 @FRONTEND.route('/delppresult.html')
 def del_ppresult():
     """Ping pong delete result functionality
@@ -724,6 +809,37 @@ def del_fbresult():
     message = 'Result successfully deleted'
     results = DB_MANAGER.get_all_fbresults()
     return flask.render_template('fbresult.html', message=message,
+                                 results=results)
+
+@FRONTEND.route('/delmkresult.html')
+def del_mkresult():
+    """MK delete result functionality
+
+    Returns:
+        displays mk result page
+
+    """
+
+    results = DB_MANAGER.get_all_mkresults()
+
+    try:
+        DB_MANAGER.delete_last_mkresult()
+
+    except elo_frontend.DBValueError as error:
+        return flask.render_template('mkresult.html', error=error, results=results)
+
+    except elo_frontend.DBConnectionError as error:
+        return flask.render_template('mkresult.html', error=error, results=results)
+
+    except elo_frontend.DBSyntaxError as error:
+        return flask.render_template('mkresult.html', error=error, results=results)
+
+    else:
+        pass
+
+    message = 'Result successfully deleted'
+    results = DB_MANAGER.get_all_mkresults()
+    return flask.render_template('mkresult.html', message=message,
                                  results=results)
 
 @FRONTEND.route('/editppplayer.html', methods=['GET', 'POST'])

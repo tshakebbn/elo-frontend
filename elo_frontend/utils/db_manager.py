@@ -232,9 +232,11 @@ mk_ind_first INT NOT NULL,\
 mk_ind_second INT NOT NULL,\
 mk_ind_third INT NULL,\
 mk_ind_fourth INT NULL,\
+course VARCHAR(75) NOT NULL,\
 time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
 PRIMARY KEY (result_id),\
 UNIQUE INDEX result_id_UNIQUE (result_id ASC),\
+UNIQUE INDEX course_UNIQUE (course ASC),\
 INDEX mk_ind_first_idx (mk_ind_first ASC),\
 INDEX mk_ind_second_idx (mk_ind_second ASC),\
 INDEX mk_ind_third_idx (mk_ind_third ASC),\
@@ -1259,6 +1261,198 @@ team_id = {1}".format(new_rating_id, losing_team))
         else:
             pass
 
+    def add_mkresult(self, first, second, third,
+        fourth, course):
+        """Method to add a mk result to database
+
+        Args:
+            first (tup):    first place
+            second (tup):   second place
+            third (tup):    third place
+            fourth (tup):   fourth place
+            course (str):   course
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(first) != 3:
+            raise exceptions.DBValueError("1st must\
+ be complete")
+
+        if len(second) != 3:
+            raise exceptions.DBValueError("2nd must\
+ be complete")
+
+        if not third:
+            if fourth:
+                raise exceptions.DBValueError("Invalid result")
+
+        if not third:
+            if not fourth:
+                if third == fourth:
+                    raise exceptions.DBValueError("Duplicate players in result")
+
+        if first == second or first == third or first == fourth:
+            raise exceptions.DBValueError("Duplicate players in result")
+
+        if second == third or second == fourth:
+            raise exceptions.DBValueError("Duplicate players in result")
+
+        self._logger.debug("Adding mk result to database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+
+            if not fourth:
+                if not third:
+                    cursor.execute("INSERT INTO mk_ind_result (mk_ind_first, \
+            mk_ind_second, mk_ind_third, mk_ind_fourth, course) VALUES ((SELECT \
+            player_id FROM player WHERE first_name = '{0}' AND last_name \
+            = '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
+            = '{3}' AND last_name = '{4}' AND nickname = '{5}'), NULL, \
+            NULL, {6})".format(first[0],
+                            first[1], first[2], second[0],
+                            second[1], second[2], course))
+                else:
+                    cursor.execute("INSERT INTO mk_ind_result (mk_ind_first, \
+        mk_ind_second, mk_ind_third, mk_ind_fourth, course) VALUES ((SELECT \
+        player_id FROM player WHERE first_name = '{0}' AND last_name \
+        = '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
+        = '{3}' AND last_name = '{4}' AND nickname = '{5}'), (SELECT player_id FROM \
+        player WHERE first_name = '{6}' AND last_name = '{7}' AND nickname = '{8}'), \
+        NULL, {9})".format(first[0],
+                        first[1], first[2], second[0],
+                        second[1], second[2], third[0],
+                        third[1], third[2], course))
+            else:
+                cursor.execute("INSERT INTO mk_ind_result (mk_ind_first, \
+    mk_ind_second, mk_ind_third, mk_ind_fourth, course) VALUES ((SELECT \
+    player_id FROM player WHERE first_name = '{0}' AND last_name \
+    = '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
+    = '{3}' AND last_name = '{4}' AND nickname = '{5}'), (SELECT player_id FROM \
+    player WHERE first_name = '{6}' AND last_name = '{7}' AND nickname = '{8}'), \
+    (SELECT player_id FROM player WHERE first_name = '{9}' AND last_name = '{10}' \
+    AND nickname = '{11}'), {12})".format(first[0],
+                    first[1], first[2], second[0],
+                    second[1], second[2], third[0],
+                    third[1], third[2], fourth[0],
+                    fourth[1], fourth[2], course))
+
+            self._logger.debug("Updating mk ratings")
+            cursor.execute("SELECT player_id, mk_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                first[0], first[1], first[2]))
+            first_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            first_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            cursor.execute("SELECT player_id, mk_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                second[0], second[1], second[2]))
+            second_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            second_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            if third:
+                cursor.execute("SELECT player_id, mk_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    third[0], third[1], third[2]))
+                third_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                third_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if fourth:
+                cursor.execute("SELECT player_id, mk_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    fourth[0], fourth[1], fourth[2]))
+                fourth_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                fourth_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if not fourth:
+                if not third:
+                    (new_first_rating,), (new_second_rating,) = \
+                    trueskill.rate([(first_rating,), (second_rating,)], ranks=[0, 1])
+                else:
+                    (new_first_rating,), (new_second_rating,), \
+                    (new_third_rating,) = \
+                    trueskill.rate([(first_rating,), (second_rating,),
+                        (third_rating,)], ranks=[0, 1, 2])
+            else:
+                (new_first_rating,), (new_second_rating,), \
+                (new_third_rating,), (new_fourth_rating,) = \
+                trueskill.rate([(first_rating,), (second_rating,),
+                    (third_rating,), (fourth_rating,)], ranks=[0, 1, 2, 3])
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_first_rating.mu, new_first_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set mk_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, first_player_id))
+            cursor.execute("INSERT INTO mk_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, first_player_id))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_second_rating.mu, new_second_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set mk_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, second_player_id))
+            cursor.execute("INSERT INTO mk_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, second_player_id))
+
+            if third:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_third_rating.mu, new_third_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set mk_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, third_player_id))
+                cursor.execute("INSERT INTO mk_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, third_player_id))
+
+            if fourth:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_fourth_rating.mu, new_fourth_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set mk_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, fourth_player_id))
+                cursor.execute("INSERT INTO mk_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, fourth_player_id))
+
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def delete_last_ppresult(self,):
         """Method to delete last ping pong result from database
 
@@ -1440,6 +1634,87 @@ team_id = {1}".format(loser_previous_rating_id, loser_team_id))
         else:
             pass
 
+    def delete_last_mkresult(self,):
+        """Method to delete last mk result from database
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Deleting last mk result from database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, mk_ind_first, mk_ind_second, mk_ind_third, \
+mk_ind_fourth FROM mk_ind_result ORDER BY time \
+DESC LIMIT 1")
+            results = cursor.fetchall()
+            result_id = results[0][0]
+            first_player_id = results[0][1]
+            second_player_id = results[0][2]
+            third_player_id = results[0][3]
+            fourth_player_id = results[0][4]
+
+            # revert from mk_ind_rating_hist
+            cursor.execute("SELECT rating FROM mk_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(first_player_id))
+            results = cursor.fetchall()
+            first_new_rating_id = results[0][0]
+            first_previous_rating_id = results[1][0]
+            cursor.execute("SELECT rating FROM mk_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(second_player_id))
+            results = cursor.fetchall()
+            second_new_rating_id = results[0][0]
+            second_previous_rating_id = results[1][0]
+            if third_player_id:
+                cursor.execute("SELECT rating FROM mk_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(third_player_id))
+                results = cursor.fetchall()
+                third_new_rating_id = results[0][0]
+                third_previous_rating_id = results[1][0]
+            if fourth_player_id:
+                cursor.execute("SELECT rating FROM mk_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(fourth_player_id))
+                results = cursor.fetchall()
+                fourth_new_rating_id = results[0][0]
+                fourth_previous_rating_id = results[1][0]
+
+            # update player ratings in player
+            cursor.execute("UPDATE player SET mk_ind_rating = {0} WHERE \
+player_id = {1}".format(first_previous_rating_id, first_player_id))
+            cursor.execute("DELETE FROM mk_ind_rating_hist WHERE rating = {0}".format(first_new_rating_id))
+            cursor.execute("UPDATE player SET mk_ind_rating = {0} WHERE \
+player_id = {1}".format(second_previous_rating_id, second_player_id))
+            cursor.execute("DELETE FROM mk_ind_rating_hist WHERE rating = {0}".format(second_new_rating_id))
+            if third_player_id:
+                cursor.execute("UPDATE player SET mk_ind_rating = {0} WHERE \
+player_id = {1}".format(third_previous_rating_id, third_player_id))
+                cursor.execute("DELETE FROM mk_ind_rating_hist WHERE rating = {0}".format(third_new_rating_id))
+            if fourth_player_id:
+                cursor.execute("UPDATE player SET mk_ind_rating = {0} WHERE \
+player_id = {1}".format(fourth_previous_rating_id, fourth_player_id))
+                cursor.execute("DELETE FROM mk_ind_rating_hist WHERE rating = {0}".format(fourth_new_rating_id))
+
+            # delete result from mk_result
+            cursor.execute("DELETE FROM mk_ind_result WHERE result_id = {0}".format(result_id))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def get_all_ppresults(self):
         """Method to get all pp results from database
 
@@ -1568,6 +1843,76 @@ player WHERE player_id = {0}".format(defense_loser_id))
         else:
             return all_results
 
+    def get_all_mkresults(self):
+        """Method to get all mk results from database
+
+        Returns:
+            all mk results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        all_results = ()
+        self._logger.debug("Getting all mk results")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, mk_ind_first, mk_ind_second, mk_ind_third, \
+mk_ind_fourth, course, time FROM mk_ind_result ORDER BY time DESC")
+            results = cursor.fetchall()
+
+            for result_id, first_id, second_id, third_id, fourth_id, course, timestamp in results:
+                intermediate_results = ()
+
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(first_id))
+                first = cursor.fetchall()
+                first_name_first, last_name_first, \
+                    nickname_first = first[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(second_id))
+                second = cursor.fetchall()
+                first_name_second, last_name_second, \
+                    nickname_second = second[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(third_id))
+                third = cursor.fetchall()
+                first_name_third, last_name_third, \
+                    nickname_third = third[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(fourth_id))
+                fourth = cursor.fetchall()
+                first_name_fourth, last_name_fourth, \
+                    nickname_fourth = fourth[0]
+
+                intermediate_results = intermediate_results + \
+                    (result_id, first_name_first, last_name_first,
+                     nickname_first, first_name_second, last_name_second,
+                     nickname_second, first_name_third,
+                     last_name_third, nickname_third, first_name_fourth,
+                     last_name_fourth, nickname_fourth, course,
+                     timestamp.strftime('%Y-%m-%d'))
+
+                all_results = all_results + (intermediate_results,)
+                del intermediate_results
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return all_results
+
     def get_total_ppresults(self):
         """Method to get pp result count from database
 
@@ -1619,6 +1964,39 @@ player WHERE player_id = {0}".format(defense_loser_id))
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
             cursor.execute("SELECT COUNT(result_id) FROM fb_result")
+            count = cursor.fetchone()[0]
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return count
+
+    def get_total_mkresults(self):
+        """Method to get mk result count from database
+
+        Returns:
+            total number of results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting mk results count")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT COUNT(result_id) FROM mk_ind_result")
             count = cursor.fetchone()[0]
 
         except MySQLdb.OperationalError:
@@ -1753,6 +2131,66 @@ defense_loser = {0}".format(player_id))
                 intermediate_rank = (first_name, last_name, nickname,
                     'Defense', round(defense_rank, 4), defense_win_count,
                     defense_lose_count)
+                ranks.append(intermediate_rank)
+                del intermediate_rank
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return ranks
+
+    def get_mk_ind_rankings(self):
+        """Method to get mk individual rankings from database
+
+        Returns:
+            individual rank list
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        ranks = []
+        self._logger.debug("Getting mk individual rankings")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT player_id, first_name, last_name, \
+nickname FROM player")
+            players = cursor.fetchall()
+
+            for player_id, first_name, last_name, nickname in players:
+                cursor.execute("SELECT mk_ind_rating FROM \
+player WHERE player_id = {0}".format(player_id))
+                ind_rating = cursor.fetchall()[0][0]
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(ind_rating))
+                mu, sigma = cursor.fetchall()[0]
+
+                ind_rank = float(mu) - (3 * float(sigma))
+
+                cursor.execute("SELECT COUNT(result_id) FROM mk_ind_result WHERE \
+mk_ind_first = {0}".format(player_id))
+                first_count = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(result_id) FROM mk_ind_result WHERE \
+mk_ind_second = {0}".format(player_id))
+                second_count = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(result_id) FROM mk_ind_result WHERE \
+mk_ind_third = {0}".format(player_id))
+                third_count = cursor.fetchone()[0]
+
+                intermediate_rank = (first_name, last_name, nickname, round(ind_rank, 4),
+                                     first_count, second_count, third_count)
                 ranks.append(intermediate_rank)
                 del intermediate_rank
 
