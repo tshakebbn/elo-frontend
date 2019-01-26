@@ -1291,8 +1291,8 @@ team_id = {1}".format(new_rating_id, losing_team))
             if fourth:
                 raise exceptions.DBValueError("Invalid result")
 
-        if not third:
-            if not fourth:
+        if third:
+            if fourth:
                 if third == fourth:
                     raise exceptions.DBValueError("Duplicate players in result")
 
@@ -1314,7 +1314,7 @@ team_id = {1}".format(new_rating_id, losing_team))
             player_id FROM player WHERE first_name = '{0}' AND last_name \
             = '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
             = '{3}' AND last_name = '{4}' AND nickname = '{5}'), NULL, \
-            NULL, {6})".format(first[0],
+            NULL, '{6}')".format(first[0],
                             first[1], first[2], second[0],
                             second[1], second[2], course))
                 else:
@@ -1324,7 +1324,7 @@ team_id = {1}".format(new_rating_id, losing_team))
         = '{1}' AND nickname = '{2}'), (SELECT player_id FROM player WHERE first_name \
         = '{3}' AND last_name = '{4}' AND nickname = '{5}'), (SELECT player_id FROM \
         player WHERE first_name = '{6}' AND last_name = '{7}' AND nickname = '{8}'), \
-        NULL, {9})".format(first[0],
+        NULL, '{9}')".format(first[0],
                         first[1], first[2], second[0],
                         second[1], second[2], third[0],
                         third[1], third[2], course))
@@ -1336,7 +1336,7 @@ team_id = {1}".format(new_rating_id, losing_team))
     = '{3}' AND last_name = '{4}' AND nickname = '{5}'), (SELECT player_id FROM \
     player WHERE first_name = '{6}' AND last_name = '{7}' AND nickname = '{8}'), \
     (SELECT player_id FROM player WHERE first_name = '{9}' AND last_name = '{10}' \
-    AND nickname = '{11}'), {12})".format(first[0],
+    AND nickname = '{11}'), '{12}')".format(first[0],
                     first[1], first[2], second[0],
                     second[1], second[2], third[0],
                     third[1], third[2], fourth[0],
