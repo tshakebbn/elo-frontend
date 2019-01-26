@@ -1878,16 +1878,22 @@ player WHERE player_id = {0}".format(second_id))
                 second = cursor.fetchall()
                 first_name_second, last_name_second, \
                     nickname_second = second[0]
-                cursor.execute("SELECT first_name, last_name, nickname FROM \
-player WHERE player_id = {0}".format(third_id))
-                third = cursor.fetchall()
-                first_name_third, last_name_third, \
-                    nickname_third = third[0]
-                cursor.execute("SELECT first_name, last_name, nickname FROM \
-player WHERE player_id = {0}".format(fourth_id))
-                fourth = cursor.fetchall()
-                first_name_fourth, last_name_fourth, \
-                    nickname_fourth = fourth[0]
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(third_id))
+                    third = cursor.fetchall()
+                    first_name_third, last_name_third, \
+                        nickname_third = third[0]
+                except MySQLdb.OperationalError:
+                    third = ''
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(fourth_id))
+                    fourth = cursor.fetchall()
+                    first_name_fourth, last_name_fourth, \
+                        nickname_fourth = fourth[0]
+                except MySQLdb.OperationalError:
+                    fourth = ''
 
                 intermediate_results = intermediate_results + \
                     (result_id, first_name_first, last_name_first,
