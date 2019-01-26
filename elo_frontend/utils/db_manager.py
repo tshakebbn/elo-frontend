@@ -2158,6 +2158,8 @@ least one character")
             raise exceptions.DBValueError("Players already on team together")
 
         self._logger.debug("Adding fb team to database")
+        # avoid database race condition
+        time.sleep(1)
         try:
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
