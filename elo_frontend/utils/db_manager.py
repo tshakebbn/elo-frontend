@@ -1202,6 +1202,8 @@ player_id = {1}".format(new_rating_id, defense_loser_player_id))
                 losing_team = self.add_fb_team(team_name="{0} & {1}\
 ".format(offense_loser[0], defense_loser[0]), member_one=offense_loser,
                     member_two=defense_loser)
+                # avoid timestamp issues in database
+                time.sleep(1)
 
             # get ratings
             cursor.execute("SELECT fb_team_rating from team WHERE team_id \
@@ -2158,8 +2160,6 @@ least one character")
             raise exceptions.DBValueError("Players already on team together")
 
         self._logger.debug("Adding fb team to database")
-        # avoid database race condition
-        time.sleep(1)
         try:
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
