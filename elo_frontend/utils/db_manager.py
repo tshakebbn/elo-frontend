@@ -236,7 +236,6 @@ course VARCHAR(75) NOT NULL,\
 time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
 PRIMARY KEY (result_id),\
 UNIQUE INDEX result_id_UNIQUE (result_id ASC),\
-UNIQUE INDEX course_UNIQUE (course ASC),\
 INDEX mk_ind_first_idx (mk_ind_first ASC),\
 INDEX mk_ind_second_idx (mk_ind_second ASC),\
 INDEX mk_ind_third_idx (mk_ind_third ASC),\
