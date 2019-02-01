@@ -252,7 +252,8 @@ def ss_result():
 
     """
 
-    return flask.render_template('ssresult.html')
+    results = DB_MANAGER.get_all_ssresults()
+    return flask.render_template('ssresult.html', results=results)
 
 @FRONTEND.route('/ssstat.html')
 def ss_stat():
