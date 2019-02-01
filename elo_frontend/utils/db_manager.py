@@ -347,17 +347,17 @@ ss_first_char VARCHAR(75) NOT NULL,\
 ss_ind_second INT NOT NULL,\
 ss_second_char VARCHAR(75) NOT NULL,\
 ss_ind_third INT NULL,\
-ss_third_char VARCHAR(75) NOT NULL,\
+ss_third_char VARCHAR(75) NULL,\
 ss_ind_fourth INT NULL,\
-ss_fourth_char VARCHAR(75) NOT NULL,\
+ss_fourth_char VARCHAR(75) NULL,\
 ss_ind_fifth INT NULL,\
-ss_fifth_char VARCHAR(75) NOT NULL,\
+ss_fifth_char VARCHAR(75) NULL,\
 ss_ind_sixth INT NULL,\
-ss_sixth_char VARCHAR(75) NOT NULL,\
+ss_sixth_char VARCHAR(75) NULL,\
 ss_ind_seventh INT NULL,\
-ss_seventh_char VARCHAR(75) NOT NULL,\
+ss_seventh_char VARCHAR(75) NULL,\
 ss_ind_eighth INT NULL,\
-ss_eighth_char VARCHAR(75) NOT NULL,\
+ss_eighth_char VARCHAR(75) NULL,\
 time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
 PRIMARY KEY (result_id),\
 UNIQUE INDEX result_id_UNIQUE (result_id ASC),\
