@@ -1,0 +1,878 @@
+{% extends "dbtemplate.html" %}
+{% block body %}
+  <div class="wrapper ">
+    <div class="sidebar" data-color="white" data-active-color="danger">
+      <!--
+        Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red | yellow"
+    -->
+      <div class="logo">
+        <a href="{{ url_for('index') }}" class="simple-text logo-mini">
+          <div class="logo-image-small">
+            <img src="{{ url_for('static', filename='img/bbn-logo-small.png') }}">
+          </div>
+        </a>
+        <a href="{{ url_for('index') }}" class="simple-text logo-normal">
+          Elo Ratings
+        </a>
+      </div>
+      <div class="sidebar-wrapper">
+        <ul class="nav">
+          <li>
+            <a href="{{ url_for('ss_home') }}">
+              <i class="fa fa-tachometer" aria-hidden="true"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('ss_player') }}">
+              <i class="fa fa-user" aria-hidden="true"></i>
+              <p>Players</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('ss_team') }}">
+              <i class="fa fa-users" aria-hidden="true"></i>
+              <p>Teams</p>
+            </a>
+          </li>
+          <li class="active ">
+            <a href="{{ url_for('ss_result') }}">
+              <i class="fa fa-desktop" aria-hidden="true"></i>
+              <p>Results</p>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('ss_stat') }}">
+              <i class="fa fa-area-chart" aria-hidden="true"></i>
+              <p>Statistics</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main-panel">
+      <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+        <div class="container-fluid">
+          <div class="navbar-wrapper">
+            <a class="navbar-brand">Super Smash</a>
+          </div>
+        </div>
+      </nav>
+      <!-- End Navbar -->
+      <!-- <div class="panel-header panel-header-lg">
+  
+  <canvas id="bigDashboardChart"></canvas>
+  
+  
+</div> -->
+      <div class="content">
+
+        {% if error %}
+        <script>
+          sweetAlert({
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
+          });
+        </script>
+        {% endif %}
+
+        <div class="row">
+          <div class="col-md-12">
+            <form action="{{ url_for('add_ssresult') }}" method="POST" class="form">
+              <div class="card ">
+                <div class="card-header ">
+                  <h5 class="card-title">Add Result</h5>
+                </div>
+                <div class="card-body">
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="first_place">1st Place *</label>
+                      <select class="form-control" id="first_place" name="first_place" required="true">
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_first_place">Character *</label>
+                      <select class="form-control" id="char_first_place" name="char_first_place" required="true">
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="second_place">2nd Place *</label>
+                      <select class="form-control" id="second_place" name="second_place" required="true">
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_second_place">Character *</label>
+                      <select class="form-control" id="char_second_place" name="char_second_place" required="true">
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="third_place">3rd Place *</label>
+                      <select class="form-control" id="third_place" name="third_place" required="true">
+                        <option>N/A</option>
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_third_place">Character *</label>
+                      <select class="form-control" id="char_third_place" name="char_third_place" required="true">
+                        <option>N/A</option>
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="fourth_place">4th Place *</label>
+                      <select class="form-control" id="fourth_place" name="fourth_place" required="true">
+                        <option>N/A</option>
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_fourth_place">Character *</label>
+                      <select class="form-control" id="char_fourth_place" name="char_fourth_place" required="true">
+                        <option>N/A</option>
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="fifth_place">5th Place *</label>
+                      <select class="form-control" id="fifth_place" name="fifth_place" required="true">
+                        <option>N/A</option>
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_fifth_place">Character *</label>
+                      <select class="form-control" id="char_fifth_place" name="char_fifth_place" required="true">
+                        <option>N/A</option>
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="sixth_place">6th Place *</label>
+                      <select class="form-control" id="sixth_place" name="sixth_place" required="true">
+                        <option>N/A</option>
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_sixth_place">Character *</label>
+                      <select class="form-control" id="char_sixth_place" name="char_sixth_place" required="true">
+                        <option>N/A</option>
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="seventh_place">7th Place *</label>
+                      <select class="form-control" id="seventh_place" name="seventh_place" required="true">
+                        <option>N/A</option>
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_seventh_place">Character *</label>
+                      <select class="form-control" id="char_seventh_place" name="char_seventh_place" required="true">
+                        <option>N/A</option>
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group has-label">
+                      <label for="eighth_place">8th Place *</label>
+                      <select class="form-control" id="eighth_place" name="eighth_place" required="true">
+                        <option>N/A</option>
+                        {% for first_name, last_name, nickname, time in players %}
+                        <option>{{ first_name }} "{{ nickname }}" {{ last_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="form-group has-label">
+                      <label for="char_eighth_place">Character *</label>
+                      <select class="form-control" id="char_eighth_place" name="char_eighth_place" required="true">
+                        <option>N/A</option>
+                        <option>Chrom</option>
+                        <option>Lucina</option>
+                        <option>Marth</option>
+                        <option>Inkling</option>
+                        <option>Ike</option>
+                        <option>Peach</option>
+                        <option>Pichu</option>
+                        <option>Bayonetta</option>
+                        <option>Cloud</option>
+                        <option>Donkey Kong</option>
+                        <option>Pikachu</option>
+                        <option>Falco</option>
+                        <option>Sonic</option>
+                        <option>Daisy</option>
+                        <option>Olimar</option>
+                        <option>Roy</option>
+                        <option>Fox</option>
+                        <option>Wolf</option>
+                        <option>Link</option>
+                        <option>Wario</option>
+                        <option>Ivysaur</option>
+                        <option>Captain Falcon</option>
+                        <option>Diddy Kong</option>
+                        <option>Young Link</option>
+                        <option>Simon</option>
+                        <option>Richter</option>
+                        <option>Snake</option>
+                        <option>Isabelle</option>
+                        <option>Sheik</option>
+                        <option>Yoshi</option>
+                        <option>Greninja</option>
+                        <option>Palutena</option>
+                        <option>Ganondorf</option>
+                        <option>Squirtle</option>
+                        <option>Shulk</option>
+                        <option>Bowser</option>
+                        <option>Meta Knight</option>
+                        <option>Pokemon Trainer</option>
+                        <option>Toon Link</option>
+                        <option>Lucas</option>
+                        <option>Ness</option>
+                        <option>Incineroar</option>
+                        <option>Charizard</option>
+                        <option>Mii Swordfighter</option>
+                        <option>R.O.B.</option>
+                        <option>Ridley</option>
+                        <option>Zero Suit Samus</option>
+                        <option>Corrin</option>
+                        <option>Mewtwo</option>
+                        <option>King K. Rool</option>
+                        <option>Piranha Plant</option>
+                        <option>Zelda</option>
+                        <option>Ken</option>
+                        <option>Wii Fit Trainer</option>
+                        <option>Pit</option>
+                        <option>Dark Pit</option>
+                        <option>Mario</option>
+                        <option>Samus</option>
+                        <option>Dark Samus</option>
+                        <option>Ryu</option>
+                        <option>Rosalina & Luma</option>
+                        <option>Villager</option>
+                        <option>Mii Brawler</option>
+                        <option>Mii Gunner</option>
+                        <option>Lucario</option>
+                        <option>Bowser Jr</option>
+                        <option>King Dedede</option>
+                        <option>Luigi</option>
+                        <option>Dr. Mario</option>
+                        <option>Mr. Game & Watch</option>
+                        <option>Mega Man</option>
+                        <option>Jigglypuff</option>
+                        <option>Little Mac</option>
+                        <option>Pac Man</option>
+                        <option>Duck Hunt</option>
+                        <option>Ice Climbers</option>
+                        <option>Robin</option>
+                        <option>Piranah Plant</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="category form-category">* Required fields</div>
+                </div>
+                <div class="card-footer text-center">
+                  <button type="submit" class="btn btn-primary btn-round">Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <footer class="footer footer-black  footer-white ">
+        <div class="container-fluid">
+          <div class="row">
+            <nav class="footer-nav">
+              <ul>
+                <li>
+                  <a href="https://www.bbn.com" target="_blank">BBN Technologies</a>
+                </li>
+              </ul>
+            </nav>
+            <div class="credits ml-auto">
+              <span class="copyright">
+                ©
+                <script>
+                  document.write(new Date().getFullYear())
+                </script>, made with <i class="fa fa-heart heart"></i> by Creative Tim
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+{% endblock %}

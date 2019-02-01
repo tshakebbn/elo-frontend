@@ -284,9 +284,14 @@ ON UPDATE NO ACTION)")
         cursor.execute("CREATE TABLE IF NOT EXISTS mp_ind_result (\
 result_id INT NOT NULL AUTO_INCREMENT,\
 mp_ind_first INT NOT NULL,\
+mp_first_char VARCHAR(75) NOT NULL,\
 mp_ind_second INT NOT NULL,\
+mp_second_char VARCHAR(75) NOT NULL,\
 mp_ind_third INT NULL,\
+mp_third_char VARCHAR(75) NOT NULL,\
 mp_ind_fourth INT NULL,\
+mp_fourth_char VARCHAR(75) NOT NULL,\
+board VARCHAR(75) NOT NULL,\
 time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
 PRIMARY KEY (result_id),\
 UNIQUE INDEX result_id_UNIQUE (result_id ASC),\
@@ -338,13 +343,21 @@ ON UPDATE NO ACTION)")
         cursor.execute("CREATE TABLE IF NOT EXISTS ss_ind_result (\
 result_id INT NOT NULL AUTO_INCREMENT,\
 ss_ind_first INT NOT NULL,\
+ss_first_char VARCHAR(75) NOT NULL,\
 ss_ind_second INT NOT NULL,\
+ss_second_char VARCHAR(75) NOT NULL,\
 ss_ind_third INT NULL,\
+ss_third_char VARCHAR(75) NOT NULL,\
 ss_ind_fourth INT NULL,\
+ss_fourth_char VARCHAR(75) NOT NULL,\
 ss_ind_fifth INT NULL,\
+ss_fifth_char VARCHAR(75) NOT NULL,\
 ss_ind_sixth INT NULL,\
+ss_sixth_char VARCHAR(75) NOT NULL,\
 ss_ind_seventh INT NULL,\
+ss_seventh_char VARCHAR(75) NOT NULL,\
 ss_ind_eighth INT NULL,\
+ss_eighth_char VARCHAR(75) NOT NULL,\
 time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
 PRIMARY KEY (result_id),\
 UNIQUE INDEX result_id_UNIQUE (result_id ASC),\
@@ -1452,6 +1465,475 @@ player_id = {1}".format(new_rating_id, fourth_player_id))
         else:
             pass
 
+    def add_ssresult(self, first, char_first, second, char_second, third, char_third, fourth,
+                char_fourth, fifth, char_fifth, sixth, char_sixth, seventh, char_seventh,
+                eighth, char_eighth):
+        """Method to add a ss result to database
+
+        Args:
+            first (tup):        first place
+            char_first (str):   first place character
+            second (tup):       second place
+            char_second (str):  second place character
+            third (tup):        third place
+            char_third (str):   third place character
+            fourth (tup):       fourth place
+            char_fourth (str):  fourth place character
+            fifth (tup):        fifth place
+            char_fifth (str):   fifth place character
+            sixth (tup):        sixth place
+            char_sixth (str):   sixth place character
+            seventh (tup):      seventh place
+            char_seventh (str): seventh place character
+            eighth (tup):       eighth place
+            char_eighth (str):  eighth place character
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        if len(first) != 3:
+            raise exceptions.DBValueError("1st must\
+ be complete")
+
+        if len(second) != 3:
+            raise exceptions.DBValueError("2nd must\
+ be complete")
+
+        if not third:
+            if fourth or fifth or sixth or seventh or eighth:
+                raise exceptions.DBValueError("Invalid result")
+
+        if not fourth:
+            if fifth or sixth or seventh or eighth:
+                raise exceptions.DBValueError("Invalid result")
+
+        if not fifth:
+            if sixth or seventh or eighth:
+                raise exceptions.DBValueError("Invalid result")
+
+        if not sixth:
+            if seventh or eighth:
+                raise exceptions.DBValueError("Invalid result")
+
+        if not seventh:
+            if eighth:
+                raise exceptions.DBValueError("Invalid result")
+
+        if third:
+            if fourth:
+                if third == fourth:
+                    raise exceptions.DBValueError("Duplicate players in result")
+
+        if first == second or first == third or first == fourth or first == fifth or first == sixth or first == seventh or first == eighth:
+            raise exceptions.DBValueError("Duplicate players in result")
+
+        if second == third or second == fourth or second == fifth or second == sixth or second == seventh or second == eighth:
+            raise exceptions.DBValueError("Duplicate players in result")
+
+        if third:
+            if fourth:
+                if fifth:
+                    if sixth:
+                        if seventh:
+                            if eighth:
+                                if third == fourth or third == fifth or third == sixth or third == seventh or third == eighth:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if fourth == fifth or fourth == sixth or fourth == seventh or fourth == eighth:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if fifth == sixth or fifth == seventh or fifth == eighth:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if sixth == seventh or sixth == eighth:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if seventh == eighth:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                            else:
+                                if third == fourth or third == fifth or third == sixth or third == seventh:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if fourth == fifth or fourth == sixth or fourth == seventh:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if fifth == sixth or fifth == seventh:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                                if sixth == seventh:
+                                    raise exceptions.DBValueError("Duplicate players in result")
+                        else:
+                            if third == fourth or third == fifth or third == sixth:
+                                raise exceptions.DBValueError("Duplicate players in result")
+                            if fourth == fifth or fourth == sixth:
+                                raise exceptions.DBValueError("Duplicate players in result")
+                            if fifth == sixth:
+                                raise exceptions.DBValueError("Duplicate players in result")
+                    else:                            
+                        if third == fourth or third == fifth:
+                            raise exceptions.DBValueError("Duplicate players in result")
+                        if fourth == fifth:
+                            raise exceptions.DBValueError("Duplicate players in result")
+                else:
+                    if third == fourth:
+                        raise exceptions.DBValueError("Duplicate players in result")
+
+        if not char_first:
+            raise exceptions.DBValueError("Character required first place")
+
+        if not char_second:
+            raise exceptions.DBValueError("Character required second place")
+
+        if third:
+            if not char_third:
+                raise exceptions.DBValueError("Character required third place")
+
+        if fourth:
+            if not char_fourth:
+                raise exceptions.DBValueError("Character required fourth place")
+
+        if fifth:
+            if not char_fifth:
+                raise exceptions.DBValueError("Character required fifth place")
+
+        if sixth:
+            if not char_sixth:
+                raise exceptions.DBValueError("Character required sixth place")
+
+        if seventh:
+            if not char_seventh:
+                raise exceptions.DBValueError("Character required seventh place")
+
+        if eighth:
+            if not char_eighth:
+                raise exceptions.DBValueError("Character required eighth place")
+
+        self._logger.debug("Adding ss result to database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+
+            if not eighth:
+                if not seventh:
+                    if not sixth:
+                        if not fifth:
+                            if not fourth:
+                                if not third:
+                                    cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second))
+                                else:
+                                    cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+(SELECT player_id FROM player WHERE first_name \
+= '{8}' AND last_name = '{9}' AND nickname = '{10}'), '{11}', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second, third[0], third[1], third[2], char_third))
+                            else:
+                                cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+(SELECT player_id FROM player WHERE first_name \
+= '{8}' AND last_name = '{9}' AND nickname = '{10}'), '{11}', (SELECT player_id FROM player WHERE first_name \
+= '{12}' AND last_name = '{13}' AND nickname = '{14}'), '{15}', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second, third[0], third[1], third[2], char_third,
+                            fourth[0], fourth[1], fourth[2], char_fourth))
+                        else:
+                            cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+(SELECT player_id FROM player WHERE first_name \
+= '{8}' AND last_name = '{9}' AND nickname = '{10}'), '{11}', (SELECT player_id FROM player WHERE first_name \
+= '{12}' AND last_name = '{13}' AND nickname = '{14}'), '{15}', (SELECT player_id FROM player WHERE first_name \
+= '{16}' AND last_name = '{17}' AND nickname = '{18}'), '{19}', NULL, NULL, NULL, NULL, NULL, NULL)".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second, third[0], third[1], third[2], char_third,
+                            fourth[0], fourth[1], fourth[2], char_fourth, fifth[0], fifth[1], fifth[2], char_fifth))
+                    else:
+                        cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+(SELECT player_id FROM player WHERE first_name \
+= '{8}' AND last_name = '{9}' AND nickname = '{10}'), '{11}', (SELECT player_id FROM player WHERE first_name \
+= '{12}' AND last_name = '{13}' AND nickname = '{14}'), '{15}', (SELECT player_id FROM player WHERE first_name \
+= '{16}' AND last_name = '{17}' AND nickname = '{18}'), '{19}', (SELECT player_id FROM player WHERE first_name \
+= '{20}' AND last_name = '{21}' AND nickname = '{22}'), '{23}', NULL, NULL, NULL, NULL)".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second, third[0], third[1], third[2], char_third,
+                            fourth[0], fourth[1], fourth[2], char_fourth, fifth[0], fifth[1], fifth[2], char_fifth,
+                            sixth[0], sixth[1], sixth[2], char_sixth))
+                else:
+                    cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+(SELECT player_id FROM player WHERE first_name \
+= '{8}' AND last_name = '{9}' AND nickname = '{10}'), '{11}', (SELECT player_id FROM player WHERE first_name \
+= '{12}' AND last_name = '{13}' AND nickname = '{14}'), '{15}', (SELECT player_id FROM player WHERE first_name \
+= '{16}' AND last_name = '{17}' AND nickname = '{18}'), '{19}', (SELECT player_id FROM player WHERE first_name \
+= '{20}' AND last_name = '{21}' AND nickname = '{22}'), '{23}', (SELECT player_id FROM player WHERE first_name \
+= '{24}' AND last_name = '{25}' AND nickname = '{26}'), '{27}', NULL, NULL)".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second, third[0], third[1], third[2], char_third,
+                            fourth[0], fourth[1], fourth[2], char_fourth, fifth[0], fifth[1], fifth[2], char_fifth,
+                            sixth[0], sixth[1], sixth[2], char_sixth, seventh[0], seventh[1], seventh[2], char_seventh))
+            else:
+                    cursor.execute("INSERT INTO ss_ind_result (ss_ind_first, ss_first_char, \
+ss_ind_second, ss_second_char, ss_ind_third, ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, \
+ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, ss_ind_eighth, ss_eighth_char) VALUES ((SELECT \
+player_id FROM player WHERE first_name = '{0}' AND last_name \
+= '{1}' AND nickname = '{2}'), '{3}', (SELECT player_id FROM player WHERE first_name \
+= '{4}' AND last_name = '{5}' AND nickname = '{6}'), '{7}', \
+(SELECT player_id FROM player WHERE first_name \
+= '{8}' AND last_name = '{9}' AND nickname = '{10}'), '{11}', (SELECT player_id FROM player WHERE first_name \
+= '{12}' AND last_name = '{13}' AND nickname = '{14}'), '{15}', (SELECT player_id FROM player WHERE first_name \
+= '{16}' AND last_name = '{17}' AND nickname = '{18}'), '{19}', (SELECT player_id FROM player WHERE first_name \
+= '{20}' AND last_name = '{21}' AND nickname = '{22}'), '{23}', (SELECT player_id FROM player WHERE first_name \
+= '{24}' AND last_name = '{25}' AND nickname = '{26}'), '{27}', (SELECT player_id FROM player WHERE first_name \
+= '{28}' AND last_name = '{29}' AND nickname = '{30}'), '{31}')".format(first[0], first[1], first[2], char_first, second[0],
+                            second[1], second[2], char_second, third[0], third[1], third[2], char_third,
+                            fourth[0], fourth[1], fourth[2], char_fourth, fifth[0], fifth[1], fifth[2], char_fifth,
+                            sixth[0], sixth[1], sixth[2], char_sixth, seventh[0], seventh[1], seventh[2], char_seventh,
+                            eighth[0], eighth[1], eighth[2], char_eighth))
+
+            self._logger.debug("Updating ss ratings")
+            cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                first[0], first[1], first[2]))
+            first_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            first_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                second[0], second[1], second[2]))
+            second_player_id, rating = cursor.fetchall()[0]
+
+            cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+            mu, sigma = cursor.fetchall()[0]
+            second_rating = trueskill.Rating(mu=float(mu),
+                sigma=float(sigma))
+
+            if third:
+                cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    third[0], third[1], third[2]))
+                third_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                third_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if fourth:
+                cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    fourth[0], fourth[1], fourth[2]))
+                fourth_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                fourth_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if fifth:
+                cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    fifth[0], fifth[1], fifth[2]))
+                fifth_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                fifth_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if sixth:
+                cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    sixth[0], sixth[1], sixth[2]))
+                sixth_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                sixth_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if seventh:
+                cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    seventh[0], seventh[1], seventh[2]))
+                seventh_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                seventh_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if eighth:
+                cursor.execute("SELECT player_id, ss_ind_rating FROM player \
+WHERE first_name = '{0}' AND last_name = '{1}' AND nickname = '{2}'".format(
+                    eighth[0], eighth[1], eighth[2]))
+                eighth_player_id, rating = cursor.fetchall()[0]
+
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(rating))
+                mu, sigma = cursor.fetchall()[0]
+                eighth_rating = trueskill.Rating(mu=float(mu),
+                    sigma=float(sigma))
+
+            if not eighth:
+                if not seventh:
+                    if not sixth:
+                        if not fifth:
+                            if not fourth:
+                                if not third:
+                                    (new_first_rating,), (new_second_rating,) = \
+                                    trueskill.rate([(first_rating,), (second_rating,)], ranks=[0, 1])
+                                else:
+                                    (new_first_rating,), (new_second_rating,), \
+                                    (new_third_rating,) = \
+                                    trueskill.rate([(first_rating,), (second_rating,),
+                                        (third_rating,)], ranks=[0, 1, 2])
+                            else:
+                                (new_first_rating,), (new_second_rating,), \
+                                (new_third_rating,), (new_fourth_rating,) = \
+                                trueskill.rate([(first_rating,), (second_rating,),
+                                    (third_rating,), (fourth_rating,)], ranks=[0, 1, 2, 3])
+                        else:
+                            (new_first_rating,), (new_second_rating,), \
+                            (new_third_rating,), (new_fourth_rating,), \
+                            (new_fifth_rating,) = \
+                            trueskill.rate([(first_rating,), (second_rating,),
+                                (third_rating,), (fourth_rating,), (fifth_rating,)], ranks=[0, 1, 2, 3, 4])
+                    else:
+                        (new_first_rating,), (new_second_rating,), \
+                        (new_third_rating,), (new_fourth_rating,), \
+                        (new_fifth_rating,), (new_sixth_rating,) = \
+                        trueskill.rate([(first_rating,), (second_rating,),
+                            (third_rating,), (fourth_rating,), (fifth_rating,), (sixth_rating,)], ranks=[0, 1, 2, 3, 4, 5])
+                else:
+                    (new_first_rating,), (new_second_rating,), \
+                    (new_third_rating,), (new_fourth_rating,), \
+                    (new_fifth_rating,), (new_sixth_rating,), \
+                    (new_seventh_rating,) = \
+                    trueskill.rate([(first_rating,), (second_rating,),
+                        (third_rating,), (fourth_rating,), (fifth_rating,), (sixth_rating,), (seventh_rating,)], ranks=[0, 1, 2, 3, 4, 5, 6])
+            else:
+                (new_first_rating,), (new_second_rating,), \
+                (new_third_rating,), (new_fourth_rating,), \
+                (new_fifth_rating,), (new_sixth_rating,), \
+                (new_seventh_rating,), (new_eighth_rating,) = \
+                trueskill.rate([(first_rating,), (second_rating,),
+                    (third_rating,), (fourth_rating,), (fifth_rating,), (sixth_rating,), (seventh_rating,), (eighth_rating,)], ranks=[0, 1, 2, 3, 4, 5, 6, 7])
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_first_rating.mu, new_first_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, first_player_id))
+            cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, first_player_id))
+
+            cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_second_rating.mu, new_second_rating.sigma))
+            new_rating_id = cursor.lastrowid
+            cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, second_player_id))
+            cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, second_player_id))
+
+            if third:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_third_rating.mu, new_third_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, third_player_id))
+                cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, third_player_id))
+
+            if fourth:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_fourth_rating.mu, new_fourth_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, fourth_player_id))
+                cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, fourth_player_id))
+
+            if fifth:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_fifth_rating.mu, new_fifth_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, fifth_player_id))
+                cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, fifth_player_id))
+
+            if sixth:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_sixth_rating.mu, new_sixth_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, sixth_player_id))
+                cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, sixth_player_id))
+
+            if seventh:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_seventh_rating.mu, new_seventh_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, seventh_player_id))
+                cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, seventh_player_id))
+
+            if eighth:
+                cursor.execute("INSERT INTO rating (mu, sigma) VALUES ({0}, {1}\
+)".format(new_eighth_rating.mu, new_eighth_rating.sigma))
+                new_rating_id = cursor.lastrowid
+                cursor.execute("UPDATE player set ss_ind_rating = {0} where \
+player_id = {1}".format(new_rating_id, eighth_player_id))
+                cursor.execute("INSERT INTO ss_ind_rating_hist (rating, player) VALUES ({0}, {1}\
+)".format(new_rating_id, eighth_player_id))
+
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def delete_last_ppresult(self,):
         """Method to delete last ping pong result from database
 
@@ -1714,6 +2196,131 @@ player_id = {1}".format(fourth_previous_rating_id, fourth_player_id))
         else:
             pass
 
+    def delete_last_ssresult(self,):
+        """Method to delete last ss result from database
+
+        Raises:
+            DBValueError:       invalid db entry
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Deleting last ss result from database")
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, ss_ind_first, ss_ind_second, ss_ind_third, \
+ss_ind_fourth, ss_ind_fifth, ss_ind_sixth, ss_ind_seventh, ss_ind_eighth FROM ss_ind_result ORDER BY time \
+DESC LIMIT 1")
+            results = cursor.fetchall()
+            result_id = results[0][0]
+            first_player_id = results[0][1]
+            second_player_id = results[0][2]
+            third_player_id = results[0][3]
+            fourth_player_id = results[0][4]
+            fifth_player_id = results[0][5]
+            sixth_player_id = results[0][6]
+            seventh_player_id = results[0][7]
+            eighth_player_id = results[0][8]
+
+            # revert from ss_ind_rating_hist
+            cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(first_player_id))
+            results = cursor.fetchall()
+            first_new_rating_id = results[0][0]
+            first_previous_rating_id = results[1][0]
+            cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(second_player_id))
+            results = cursor.fetchall()
+            second_new_rating_id = results[0][0]
+            second_previous_rating_id = results[1][0]
+            if third_player_id:
+                cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(third_player_id))
+                results = cursor.fetchall()
+                third_new_rating_id = results[0][0]
+                third_previous_rating_id = results[1][0]
+            if fourth_player_id:
+                cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(fourth_player_id))
+                results = cursor.fetchall()
+                fourth_new_rating_id = results[0][0]
+                fourth_previous_rating_id = results[1][0]
+            if fifth_player_id:
+                cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(fifth_player_id))
+                results = cursor.fetchall()
+                fifth_new_rating_id = results[0][0]
+                fifth_previous_rating_id = results[1][0]
+            if sixth_player_id:
+                cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(sixth_player_id))
+                results = cursor.fetchall()
+                sixth_new_rating_id = results[0][0]
+                sixth_previous_rating_id = results[1][0]
+            if seventh_player_id:
+                cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(seventh_player_id))
+                results = cursor.fetchall()
+                seventh_new_rating_id = results[0][0]
+                seventh_previous_rating_id = results[1][0]
+            if eighth_player_id:
+                cursor.execute("SELECT rating FROM ss_ind_rating_hist WHERE player = {0} ORDER \
+BY time DESC LIMIT 2".format(eighth_player_id))
+                results = cursor.fetchall()
+                eighth_new_rating_id = results[0][0]
+                eighth_previous_rating_id = results[1][0]
+
+            # update player ratings in player
+            cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(first_previous_rating_id, first_player_id))
+            cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(first_new_rating_id))
+            cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(second_previous_rating_id, second_player_id))
+            cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(second_new_rating_id))
+            if third_player_id:
+                cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(third_previous_rating_id, third_player_id))
+                cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(third_new_rating_id))
+            if fourth_player_id:
+                cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(fourth_previous_rating_id, fourth_player_id))
+                cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(fourth_new_rating_id))
+            if fifth_player_id:
+                cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(fifth_previous_rating_id, fifth_player_id))
+                cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(fifth_new_rating_id))
+            if sixth_player_id:
+                cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(sixth_previous_rating_id, sixth_player_id))
+                cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(sixth_new_rating_id))
+            if seventh_player_id:
+                cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(seventh_previous_rating_id, seventh_player_id))
+                cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(seventh_new_rating_id))
+            if eighth_player_id:
+                cursor.execute("UPDATE player SET ss_ind_rating = {0} WHERE \
+player_id = {1}".format(eighth_previous_rating_id, eighth_player_id))
+                cursor.execute("DELETE FROM ss_ind_rating_hist WHERE rating = {0}".format(eighth_new_rating_id))
+
+            # delete result from ss_result
+            cursor.execute("DELETE FROM ss_ind_result WHERE result_id = {0}".format(result_id))
+            self._db_conn.commit()
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            pass
+
     def get_all_ppresults(self):
         """Method to get all pp results from database
 
@@ -1922,6 +2529,137 @@ player WHERE player_id = {0}".format(second_id))
         else:
             return all_results
 
+    def get_all_ssresults(self):
+        """Method to get all ss results from database
+
+        Returns:
+            all ss results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        all_results = ()
+        self._logger.debug("Getting all ss results")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT result_id, ss_ind_first, ss_first_char, ss_ind_second, ss_second_char, ss_ind_third, \
+ss_third_char, ss_ind_fourth, ss_fourth_char, ss_ind_fifth, ss_fifth_char, ss_ind_sixth, ss_sixth_char, ss_ind_seventh, ss_seventh_char, \
+ss_ind_eighth, ss_eighth_char, time FROM ss_ind_result ORDER BY time DESC")
+            results = cursor.fetchall()
+
+            for result_id, first_id, first_char, second_id, second_char, third_id, third_char, fourth_id, fourth_char, fifth_id, fifth_char, sixth_id, sixth_char, seventh_id, seventh_char, eighth_id, eighth_char, timestamp in results:
+                intermediate_results = ()
+
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(first_id))
+                first = cursor.fetchall()
+                first_name_first, last_name_first, \
+                    nickname_first = first[0]
+                cursor.execute("SELECT first_name, last_name, nickname FROM \
+player WHERE player_id = {0}".format(second_id))
+                second = cursor.fetchall()
+                first_name_second, last_name_second, \
+                    nickname_second = second[0]
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(third_id))
+                    third = cursor.fetchall()
+                    first_name_third, last_name_third, \
+                        nickname_third = third[0]
+                except MySQLdb.OperationalError:
+                    first_name_third = ''
+                    last_name_third = ''
+                    nickname_third = ''
+                    third_char = ''
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(fourth_id))
+                    fourth = cursor.fetchall()
+                    first_name_fourth, last_name_fourth, \
+                        nickname_fourth = fourth[0]
+                except MySQLdb.OperationalError:
+                    first_name_fourth = ''
+                    last_name_fourth = ''
+                    nickname_fourth = ''
+                    fourth_char = ''
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(fifth_id))
+                    fifth = cursor.fetchall()
+                    first_name_fifth, last_name_fifth, \
+                        nickname_fifth = fifth[0]
+                except MySQLdb.OperationalError:
+                    first_name_fifth = ''
+                    last_name_fifth = ''
+                    nickname_fifth = ''
+                    fifth_char = ''
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(sixth_id))
+                    sixth = cursor.fetchall()
+                    first_name_sixth, last_name_sixth, \
+                        nickname_sixth = sixth[0]
+                except MySQLdb.OperationalError:
+                    first_name_sixth = ''
+                    last_name_sixth = ''
+                    nickname_sixth = ''
+                    sixth_char = ''
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(seventh_id))
+                    seventh = cursor.fetchall()
+                    first_name_seventh, last_name_seventh, \
+                        nickname_seventh = seventh[0]
+                except MySQLdb.OperationalError:
+                    first_name_seventh = ''
+                    last_name_seventh = ''
+                    nickname_seventh = ''
+                    seventh_char = ''
+                try:
+                    cursor.execute("SELECT first_name, last_name, nickname FROM \
+    player WHERE player_id = {0}".format(eighth_id))
+                    eighth = cursor.fetchall()
+                    first_name_eighth, last_name_eighth, \
+                        nickname_eighth = eighth[0]
+                except MySQLdb.OperationalError:
+                    first_name_eighth = ''
+                    last_name_eighth = ''
+                    nickname_eighth = ''
+                    eighth_char = ''
+
+                intermediate_results = intermediate_results + \
+                    (result_id, first_name_first, last_name_first,
+                     nickname_first, first_char, first_name_second, last_name_second,
+                     nickname_second, second_char, first_name_third,
+                     last_name_third, nickname_third, third_char, first_name_fourth,
+                     last_name_fourth, nickname_fourth, fourth_char, first_name_fifth,
+                     last_name_fifth, nickname_fifth, fifth_char, first_name_sixth,
+                     last_name_sixth, nickname_sixth, sixth_char, first_name_seventh,
+                     last_name_seventh, nickname_seventh, seventh_char, first_name_eighth,
+                     last_name_eighth, nickname_eighth, eighth_char,
+                     timestamp.strftime('%Y-%m-%d'))
+
+                all_results = all_results + (intermediate_results,)
+                del intermediate_results
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return all_results
+
     def get_total_ppresults(self):
         """Method to get pp result count from database
 
@@ -2006,6 +2744,39 @@ player WHERE player_id = {0}".format(second_id))
             self.check_if_db_connected()
             cursor = self._db_conn.cursor()
             cursor.execute("SELECT COUNT(result_id) FROM mk_ind_result")
+            count = cursor.fetchone()[0]
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return count
+
+    def get_total_ssresults(self):
+        """Method to get ss result count from database
+
+        Returns:
+            total number of results
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        self._logger.debug("Getting ss results count")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT COUNT(result_id) FROM ss_ind_result")
             count = cursor.fetchone()[0]
 
         except MySQLdb.OperationalError:
@@ -2196,6 +2967,66 @@ mk_ind_second = {0}".format(player_id))
                 second_count = cursor.fetchone()[0]
                 cursor.execute("SELECT COUNT(result_id) FROM mk_ind_result WHERE \
 mk_ind_third = {0}".format(player_id))
+                third_count = cursor.fetchone()[0]
+
+                intermediate_rank = (first_name, last_name, nickname, round(ind_rank, 4),
+                                     first_count, second_count, third_count)
+                ranks.append(intermediate_rank)
+                del intermediate_rank
+
+        except MySQLdb.OperationalError:
+            self._logger.error("MySQL operational error occured")
+            traceback.print_exc()
+            raise exceptions.DBConnectionError("Cannot connect to MySQL server")
+
+        except MySQLdb.ProgrammingError:
+            self._logger.error("MySQL programming error")
+            traceback.print_exc()
+            raise exceptions.DBSyntaxError("MySQL syntax error")
+
+        else:
+            return ranks
+
+    def get_ss_ind_rankings(self):
+        """Method to get ss individual rankings from database
+
+        Returns:
+            individual rank list
+
+        Raises:
+            DBConnectionError:  database connection issues
+            DBSyntaxError:      invalid database programming statement
+
+        """
+
+        ranks = []
+        self._logger.debug("Getting ss individual rankings")
+
+        try:
+            self.check_if_db_connected()
+            cursor = self._db_conn.cursor()
+            cursor.execute("SELECT player_id, first_name, last_name, \
+nickname FROM player")
+            players = cursor.fetchall()
+
+            for player_id, first_name, last_name, nickname in players:
+                cursor.execute("SELECT ss_ind_rating FROM \
+player WHERE player_id = {0}".format(player_id))
+                ind_rating = cursor.fetchall()[0][0]
+                cursor.execute("SELECT mu, sigma FROM rating WHERE rating_id \
+= {0}".format(ind_rating))
+                mu, sigma = cursor.fetchall()[0]
+
+                ind_rank = float(mu) - (3 * float(sigma))
+
+                cursor.execute("SELECT COUNT(result_id) FROM ss_ind_result WHERE \
+ss_ind_first = {0}".format(player_id))
+                first_count = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(result_id) FROM ss_ind_result WHERE \
+ss_ind_second = {0}".format(player_id))
+                second_count = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(result_id) FROM ss_ind_result WHERE \
+ss_ind_third = {0}".format(player_id))
                 third_count = cursor.fetchone()[0]
 
                 intermediate_rank = (first_name, last_name, nickname, round(ind_rank, 4),

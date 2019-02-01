@@ -67,11 +67,32 @@
   
 </div> -->
       <div class="content">
+
+        {% if message %}
+        <script>
+          sweetAlert({
+            type: 'success',
+            title: 'Success!',
+            text: "{{ message }}",
+          });
+        </script>
+        {% endif %}
+
+        {% if error %}
+        <script>
+          sweetAlert({
+            type: 'error',
+            title: 'Error!',
+            text: "{{ error }}",
+          });
+        </script>
+        {% endif %}
+
         <div class="row">
           <div class="col-md-12">
-            <button class="btn btn-primary btn-round">
+            <a href="{{ url_for('add_ssresult') }}"><button class="btn btn-primary btn-round">
               Add Result
-            </button>
+            </button></a>
           </div>
         </div>
         <div class="row">
@@ -90,29 +111,39 @@
                         <th>2nd</th>
                         <th>3rd</th>
                         <th>4th</th>
-                        <th>TBD loop</th>
+                        <th>5th</th>
+                        <th>6th</th>
+                        <th>7th</th>
+                        <th>8th</th>
                         <th>Date</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
+                      {% for result_id, first_name_first_place, last_name_first_place, nickname_first_place, character_first_place, first_name_second_place, last_name_second_place, nickname_second_place, character_second_place, first_name_third_place, last_name_third_place, nickname_third_place, character_third_place, first_name_fourth_place, last_name_fourth_place, nickname_fourth_place, character_fourth_place, first_name_fifth_place, last_name_fifth_place, nickname_fifth_place, character_fifth_place, first_name_sixth_place, last_name_sixth_place, nickname_sixth_place, character_sixth_place, first_name_seventh_place, last_name_seventh_place, nickname_seventh_place, character_seventh_place, first_name_eighth_place, last_name_eighth_place, nickname_eighth_place, character_eighth_place, date in results%}
                       <tr>
-                        <td>TBD<br>(Character)</td>
-                        <td>TBD<br>(Character)</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
-                        <td>TBD</td>
+                        <td>{{ result_id }}</td>
+                        <td>{{ first_name_first_place }} "{{  nickname_first_place }}" {{last_name_first_place }}<br>({{ character_first_place }})</td>
+                        <td>{{ first_name_second_place }} "{{  nickname_second_place }}" {{last_name_second_place }}<br>({{ character_second_place }})</td>
+                        <td>{{ first_name_third_place }} "{{  nickname_third_place }}" {{last_name_third_place }}<br>({{ character_third_place }})</td>
+                        <td>{{ first_name_fourth_place }} "{{  nickname_fourth_place }}" {{last_name_fourth_place }}<br>({{ character_fourth_place }})</td>
+                        <td>{{ first_name_fifth_place }} "{{  nickname_fifth_place }}" {{last_name_fifth_place }}<br>({{ character_fifth_place }})</td>
+                        <td>{{ first_name_sixth_place }} "{{  nickname_sixth_place }}" {{last_name_sixth_place }}<br>({{ character_sixth_place }})</td>
+                        <td>{{ first_name_seventh_place }} "{{  nickname_seventh_place }}" {{last_name_seventh_place }}<br>({{ character_seventh_place }})</td>
+                        <td>{{ first_name_eighth_place }} "{{  nickname_eighth_place }}" {{last_name_eighth_place }}<br>({{ character_eighth_place }})</td>
+                        <td>{{ date }}</td>
                         <td>
                           <button type="button" rel="tooltip" class="btn btn-success btn-icon btn-sm ">
                             <i class="fa fa-edit"></i>
                           </button>
-                          <button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
+                          {% if loop.index == 1 %}
+                          <a href="{{ url_for('del_ssresult') }}"><button type="button" rel="tooltip" class="btn btn-danger btn-icon btn-sm ">
                             <i class="fa fa-times"></i>
-                          </button>
+                          </button></a>
+                          {% endif %}
                         </td>
                       </tr>
+                      {% endfor %}
                     </tbody>
                   </table>
                 </div>

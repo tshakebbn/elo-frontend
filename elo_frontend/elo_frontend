@@ -213,7 +213,12 @@ def ss_home():
     """
 
     player_count = DB_MANAGER.get_total_players()
-    return flask.render_template('ss.html', player_count=player_count)
+    match_count = DB_MANAGER.get_total_ssresults()
+    individual_ranks = DB_MANAGER.get_ss_ind_rankings()
+    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3],
+        reverse=True)
+    return flask.render_template('ss.html', player_count=player_count,
+        match_count=match_count, individual_ranks=individual_ranks)
 
 @FRONTEND.route('/ssplayer.html')
 def ss_player():
@@ -749,6 +754,155 @@ def add_mkresult():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
+@FRONTEND.route('/addssresult.html', methods=['GET', 'POST'])
+def add_ssresult():
+    """Super smash add result page
+
+    Returns:
+        displays super smash add result page
+
+    """
+
+    players = DB_MANAGER.get_all_players()
+
+    if flask.request.method == 'POST':
+        first_place = flask.request.form['first_place'].encode('utf-8')
+        char_first_place = flask.request.form['char_first_place'].encode('utf-8')
+        second_place = flask.request.form['second_place'].encode('utf-8')
+        char_second_place = flask.request.form['char_second_place'].encode('utf-8')
+        third_place = flask.request.form['third_place'].encode('utf-8')
+        char_third_place = flask.request.form['char_third_place'].encode('utf-8')
+        fourth_place = flask.request.form['fourth_place'].encode('utf-8')
+        char_fourth_place = flask.request.form['char_fourth_place'].encode('utf-8')
+        fifth_place = flask.request.form['fifth_place'].encode('utf-8')
+        char_fifth_place = flask.request.form['char_fifth_place'].encode('utf-8')
+        sixth_place = flask.request.form['sixth_place'].encode('utf-8')
+        char_sixth_place = flask.request.form['char_sixth_place'].encode('utf-8')
+        seventh_place = flask.request.form['seventh_place'].encode('utf-8')
+        char_seventh_place = flask.request.form['char_seventh_place'].encode('utf-8')
+        eighth_place = flask.request.form['eighth_place'].encode('utf-8')
+        char_eighth_place = flask.request.form['char_eighth_place'].encode('utf-8')
+
+        first_quote = first_place.find('"')
+        second_quote = first_place.find('"', first_quote + 1)
+        final_first_place = (first_place[:first_quote - 1],
+            first_place[second_quote + 2:],
+            first_place[first_quote + 1:second_quote])
+
+        first_quote = second_place.find('"')
+        second_quote = second_place.find('"', first_quote + 1)
+        final_second_place = (second_place[:first_quote - 1],
+            second_place[second_quote + 2:],
+            second_place[first_quote + 1:second_quote])
+
+        if third_place == "N/A":
+            final_third_place = False
+        else:
+            first_quote = third_place.find('"')
+            second_quote = third_place.find('"', first_quote + 1)
+            final_third_place = (third_place[:first_quote - 1],
+                third_place[second_quote + 2:],
+                third_place[first_quote + 1:second_quote])
+        if char_third_place == "N/A":
+            char_third_place = False
+
+        if fourth_place == "N/A":
+            final_fourth_place = False
+        else:
+            first_quote = fourth_place.find('"')
+            second_quote = fourth_place.find('"', first_quote + 1)
+            final_fourth_place = (fourth_place[:first_quote - 1],
+                fourth_place[second_quote + 2:],
+                fourth_place[first_quote + 1:second_quote])
+        if char_fourth_place == "N/A":
+            char_fourth_place = False
+
+        if fifth_place == "N/A":
+            final_fifth_place = False
+        else:
+            first_quote = fifth_place.find('"')
+            second_quote = fifth_place.find('"', first_quote + 1)
+            final_fifth_place = (fifth_place[:first_quote - 1],
+                fifth_place[second_quote + 2:],
+                fifth_place[first_quote + 1:second_quote])
+        if char_fifth_place == "N/A":
+            char_fifth_place = False
+
+        if sixth_place == "N/A":
+            final_sixth_place = False
+        else:
+            first_quote = sixth_place.find('"')
+            second_quote = sixth_place.find('"', first_quote + 1)
+            final_sixth_place = (sixth_place[:first_quote - 1],
+                sixth_place[second_quote + 2:],
+                sixth_place[first_quote + 1:second_quote])
+        if char_sixth_place == "N/A":
+            char_sixth_place = False
+
+        if seventh_place == "N/A":
+            final_seventh_place = False
+        else:
+            first_quote = seventh_place.find('"')
+            second_quote = seventh_place.find('"', first_quote + 1)
+            final_seventh_place = (seventh_place[:first_quote - 1],
+                seventh_place[second_quote + 2:],
+                seventh_place[first_quote + 1:second_quote])
+        if char_seventh_place == "N/A":
+            char_seventh_place = False
+
+        if eighth_place == "N/A":
+            final_eighth_place = False
+        else:
+            first_quote = eighth_place.find('"')
+            second_quote = eighth_place.find('"', first_quote + 1)
+            final_eighth_place = (eighth_place[:first_quote - 1],
+                eighth_place[second_quote + 2:],
+                eighth_place[first_quote + 1:second_quote])
+        if char_eighth_place == "N/A":
+            char_eighth_place = False
+
+        try:
+            DB_MANAGER.add_ssresult(
+                first=final_first_place,
+                char_first=char_first_place,
+                second=final_second_place,
+                char_second=char_second_place,
+                third=final_third_place,
+                char_third=char_third_place,
+                fourth=final_fourth_place,
+                char_fourth=char_fourth_place,
+                fifth=final_fifth_place,
+                char_fifth=char_fifth_place,
+                sixth=final_sixth_place,
+                char_sixth=char_sixth_place,
+                seventh=final_seventh_place,
+                char_seventh=char_seventh_place,
+                eighth=final_eighth_place,
+                char_eighth=char_eighth_place)
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('addssresult.html', error=error, players=players)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('addssresult.html', error=error, players=players)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('addssresult.html', error=error, players=players)
+
+        else:
+            pass
+
+        message = 'Result successfully added'
+        results = DB_MANAGER.get_all_ssresults()
+        return flask.render_template('ssresult.html', message=message,
+                                     results=results)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('addssresult.html', players=players)
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+
 @FRONTEND.route('/delppresult.html')
 def del_ppresult():
     """Ping pong delete result functionality
@@ -840,6 +994,37 @@ def del_mkresult():
     message = 'Result successfully deleted'
     results = DB_MANAGER.get_all_mkresults()
     return flask.render_template('mkresult.html', message=message,
+                                 results=results)
+
+@FRONTEND.route('/delssresult.html')
+def del_ssresult():
+    """SSdelete result functionality
+
+    Returns:
+        displays ss result page
+
+    """
+
+    results = DB_MANAGER.get_all_ssresults()
+
+    try:
+        DB_MANAGER.delete_last_ssresult()
+
+    except elo_frontend.DBValueError as error:
+        return flask.render_template('ssresult.html', error=error, results=results)
+
+    except elo_frontend.DBConnectionError as error:
+        return flask.render_template('ssresult.html', error=error, results=results)
+
+    except elo_frontend.DBSyntaxError as error:
+        return flask.render_template('ssresult.html', error=error, results=results)
+
+    else:
+        pass
+
+    message = 'Result successfully deleted'
+    results = DB_MANAGER.get_all_ssresults()
+    return flask.render_template('ssresult.html', message=message,
                                  results=results)
 
 @FRONTEND.route('/editppplayer.html', methods=['GET', 'POST'])
