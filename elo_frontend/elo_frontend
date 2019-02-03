@@ -93,14 +93,14 @@ def login():
         password = flask.request.form['password'].encode('utf-8')
 
         if not werkzeug.security.check_password_hash('pbkdf2:sha256:50000$l6Z6WSc4$7ae7247c60e01b77bd02fb653fb1c3188b4811ce82201e615adc40395195d1b9', username):
-            message = "Invalid credentials"
-            return flask.render_template('login.html', message=message)
+            error = "Invalid credentials"
+            return flask.render_template('login.html', error=error)
 
         if werkzeug.security.check_password_hash('pbkdf2:sha256:50000$lHn045UX$8cd45d105a73a87f4a4ba6baa8f4145479f9fba37e253a848e4b8c531ae16ebb', password):
             flask.session['logged_in'] = True
         else:
-            message = "Invalid credentials"
-            return flask.render_template('login.html', message=message)
+            error = "Invalid credentials"
+            return flask.render_template('login.html', error=error)
 
     elif flask.request.method == 'GET':
         return flask.render_template('login.html')
