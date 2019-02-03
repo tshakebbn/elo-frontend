@@ -1588,6 +1588,7 @@ def main():
         pass
 
     try:
+        FRONTEND.secret_key = os.urandom(12)
         FRONTEND.run(debug=True, port=config.get('options', 'port'), host=config.get('options', 'host'))
     except ConfigParser.NoSectionError:
         traceback.print_exc()
