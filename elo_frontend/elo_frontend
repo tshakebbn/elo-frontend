@@ -79,7 +79,7 @@ def index():
     else:
         return flask.render_template('landing.html')
 
-@FRONTEND.route('/login.html')
+@FRONTEND.route('/login.html', methods=['GET', 'POST'])
 def login():
     """Login page
 
