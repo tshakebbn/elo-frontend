@@ -98,6 +98,8 @@ def login():
 
         if werkzeug.security.check_password_hash('pbkdf2:sha256:50000$lHn045UX$8cd45d105a73a87f4a4ba6baa8f4145479f9fba37e253a848e4b8c531ae16ebb', password):
             flask.session['logged_in'] = True
+            return flask.render_template('landing.html')
+
         else:
             error = "Invalid credentials"
             return flask.render_template('login.html', error=error)
