@@ -38,6 +38,7 @@ import sys
 import argparse
 import ConfigParser
 import flask
+import werkzeug.security
 import pkg_resources
 import appdirs
 
@@ -49,6 +50,7 @@ FRONTEND = flask.Flask(
     template_folder=pkg_resources.resource_filename('elo_frontend', 'templates'))
 
 DB_MANAGER = elo_frontend.DBManager(db_user='elo', db_pass='password')
+LOGIN_MANAGER = flask-login.LoginManager()
 
 @FRONTEND.route('/')
 def index_redirect():
@@ -59,7 +61,10 @@ def index_redirect():
 
     """
 
-    return flask.render_template('landing.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('landing.html')
 
 @FRONTEND.route('/index.html')
 def index():
@@ -70,7 +75,10 @@ def index():
 
     """
 
-    return flask.render_template('landing.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('landing.html')
 
 @FRONTEND.route('/login.html')
 def login():
@@ -81,7 +89,25 @@ def login():
 
     """
 
-    return flask.render_template('login.html')
+    if flask.request.method == 'POST':
+        username = flask.request.form['username'].encode('utf-8')
+        password = flask.request.form['password'].encode('utf-8')
+
+        if not werkzeug.security.check_password_hash('pbkdf2:sha256:50000$l6Z6WSc4$7ae7247c60e01b77bd02fb653fb1c3188b4811ce82201e615adc40395195d1b9', username):
+            message = "Invalid credentials"
+            return flask.render_template('login.html', message=message)
+
+        if werkzeug.security.check_password_hash('pbkdf2:sha256:50000$lHn045UX$8cd45d105a73a87f4a4ba6baa8f4145479f9fba37e253a848e4b8c531ae16ebb', password):
+            flask.session['logged_in'] = True
+        else:
+            message = "Invalid credentials"
+            return flask.render_template('login.html', message=message)
+
+    elif flask.request.method == 'GET':
+        return flask.render_template('login.html')
+
+    else:
+        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/mk.html')
 def mk_home():
@@ -92,13 +118,16 @@ def mk_home():
 
     """
 
-    player_count = DB_MANAGER.get_total_players()
-    race_count = DB_MANAGER.get_total_mkresults()
-    individual_ranks = DB_MANAGER.get_mk_ind_rankings()
-    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3],
-        reverse=True)
-    return flask.render_template('mk.html', player_count=player_count, race_count=race_count,
-        individual_ranks=individual_ranks)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        player_count = DB_MANAGER.get_total_players()
+        race_count = DB_MANAGER.get_total_mkresults()
+        individual_ranks = DB_MANAGER.get_mk_ind_rankings()
+        individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3],
+            reverse=True)
+        return flask.render_template('mk.html', player_count=player_count, race_count=race_count,
+            individual_ranks=individual_ranks)
 
 @FRONTEND.route('/mkplayer.html')
 def mk_player():
@@ -109,8 +138,11 @@ def mk_player():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-    return flask.render_template('mkplayer.html', players=players)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('mkplayer.html', players=players)
 
 @FRONTEND.route('/mkteam.html')
 def mk_team():
@@ -121,7 +153,10 @@ def mk_team():
 
     """
 
-    return flask.render_template('mkteam.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('mkteam.html')
 
 @FRONTEND.route('/mkresult.html')
 def mk_result():
@@ -132,8 +167,11 @@ def mk_result():
 
     """
 
-    results = DB_MANAGER.get_all_mkresults()
-    return flask.render_template('mkresult.html', results=results)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        results = DB_MANAGER.get_all_mkresults()
+        return flask.render_template('mkresult.html', results=results)
 
 @FRONTEND.route('/mkstat.html')
 def mk_stat():
@@ -144,7 +182,10 @@ def mk_stat():
 
     """
 
-    return flask.render_template('mkstat.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('mkstat.html')
 
 @FRONTEND.route('/mp.html')
 def mp_home():
@@ -155,8 +196,11 @@ def mp_home():
 
     """
 
-    player_count = DB_MANAGER.get_total_players()
-    return flask.render_template('mp.html', player_count=player_count)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        player_count = DB_MANAGER.get_total_players()
+        return flask.render_template('mp.html', player_count=player_count)
 
 @FRONTEND.route('/mpplayer.html')
 def mp_player():
@@ -167,8 +211,11 @@ def mp_player():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-    return flask.render_template('mpplayer.html', players=players)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('mpplayer.html', players=players)
 
 @FRONTEND.route('/mpteam.html')
 def mp_team():
@@ -179,7 +226,10 @@ def mp_team():
 
     """
 
-    return flask.render_template('mpteam.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('mpteam.html')
 
 @FRONTEND.route('/mpresult.html')
 def mp_result():
@@ -190,7 +240,10 @@ def mp_result():
 
     """
 
-    return flask.render_template('mpresult.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('mpresult.html')
 
 @FRONTEND.route('/mpstat.html')
 def mp_stat():
@@ -201,7 +254,10 @@ def mp_stat():
 
     """
 
-    return flask.render_template('mpstat.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('mpstat.html')
 
 @FRONTEND.route('/ss.html')
 def ss_home():
@@ -212,13 +268,16 @@ def ss_home():
 
     """
 
-    player_count = DB_MANAGER.get_total_players()
-    match_count = DB_MANAGER.get_total_ssresults()
-    individual_ranks = DB_MANAGER.get_ss_ind_rankings()
-    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3],
-        reverse=True)
-    return flask.render_template('ss.html', player_count=player_count,
-        match_count=match_count, individual_ranks=individual_ranks)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        player_count = DB_MANAGER.get_total_players()
+        match_count = DB_MANAGER.get_total_ssresults()
+        individual_ranks = DB_MANAGER.get_ss_ind_rankings()
+        individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3],
+            reverse=True)
+        return flask.render_template('ss.html', player_count=player_count,
+            match_count=match_count, individual_ranks=individual_ranks)
 
 @FRONTEND.route('/ssplayer.html')
 def ss_player():
@@ -229,8 +288,11 @@ def ss_player():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-    return flask.render_template('ssplayer.html', players=players)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('ssplayer.html', players=players)
 
 @FRONTEND.route('/ssteam.html')
 def ss_team():
@@ -241,7 +303,10 @@ def ss_team():
 
     """
 
-    return flask.render_template('ssteam.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('ssteam.html')
 
 @FRONTEND.route('/ssresult.html')
 def ss_result():
@@ -252,8 +317,11 @@ def ss_result():
 
     """
 
-    results = DB_MANAGER.get_all_ssresults()
-    return flask.render_template('ssresult.html', results=results)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        results = DB_MANAGER.get_all_ssresults()
+        return flask.render_template('ssresult.html', results=results)
 
 @FRONTEND.route('/ssstat.html')
 def ss_stat():
@@ -264,7 +332,10 @@ def ss_stat():
 
     """
 
-    return flask.render_template('ssstat.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('ssstat.html')
 
 @FRONTEND.route('/pp.html')
 def pp_home():
@@ -275,12 +346,15 @@ def pp_home():
 
     """
 
-    player_count = DB_MANAGER.get_total_players()
-    game_count = DB_MANAGER.get_total_ppresults()
-    individual_ranks = DB_MANAGER.get_pp_ind_rankings()
-    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3], reverse=True)
-    return flask.render_template('pp.html', player_count=player_count, game_count=game_count,
-                                 individual_ranks=individual_ranks)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        player_count = DB_MANAGER.get_total_players()
+        game_count = DB_MANAGER.get_total_ppresults()
+        individual_ranks = DB_MANAGER.get_pp_ind_rankings()
+        individual_ranks = sorted(individual_ranks, key=lambda tup: tup[3], reverse=True)
+        return flask.render_template('pp.html', player_count=player_count, game_count=game_count,
+                                     individual_ranks=individual_ranks)
 
 @FRONTEND.route('/ppplayer.html')
 def pp_player():
@@ -291,8 +365,11 @@ def pp_player():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-    return flask.render_template('ppplayer.html', players=players)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('ppplayer.html', players=players)
 
 @FRONTEND.route('/ppresult.html')
 def pp_result():
@@ -303,8 +380,11 @@ def pp_result():
 
     """
 
-    results = DB_MANAGER.get_all_ppresults()
-    return flask.render_template('ppresult.html', results=results)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        results = DB_MANAGER.get_all_ppresults()
+        return flask.render_template('ppresult.html', results=results)
 
 @FRONTEND.route('/ppstat.html')
 def pp_stat():
@@ -315,7 +395,10 @@ def pp_stat():
 
     """
 
-    return flask.render_template('ppstat.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('ppstat.html')
 
 @FRONTEND.route('/fb.html')
 def fb_home():
@@ -326,18 +409,21 @@ def fb_home():
 
     """
 
-    player_count = DB_MANAGER.get_total_players()
-    team_count = DB_MANAGER.get_total_fb_teams()
-    game_count = DB_MANAGER.get_total_fbresults()
-    individual_ranks = DB_MANAGER.get_fb_ind_rankings()
-    individual_ranks = sorted(individual_ranks, key=lambda tup: tup[4],
-        reverse=True)
-    team_ranks = DB_MANAGER.get_fb_team_rankings()
-    team_ranks = sorted(team_ranks, key=lambda tup: tup[1],
-        reverse=True)
-    return flask.render_template(
-        'fb.html', player_count=player_count, team_count=team_count,
-        individual_ranks=individual_ranks, team_ranks=team_ranks, game_count=game_count)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        player_count = DB_MANAGER.get_total_players()
+        team_count = DB_MANAGER.get_total_fb_teams()
+        game_count = DB_MANAGER.get_total_fbresults()
+        individual_ranks = DB_MANAGER.get_fb_ind_rankings()
+        individual_ranks = sorted(individual_ranks, key=lambda tup: tup[4],
+            reverse=True)
+        team_ranks = DB_MANAGER.get_fb_team_rankings()
+        team_ranks = sorted(team_ranks, key=lambda tup: tup[1],
+            reverse=True)
+        return flask.render_template(
+            'fb.html', player_count=player_count, team_count=team_count,
+            individual_ranks=individual_ranks, team_ranks=team_ranks, game_count=game_count)
 
 @FRONTEND.route('/fbplayer.html')
 def fb_player():
@@ -348,8 +434,11 @@ def fb_player():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-    return flask.render_template('fbplayer.html', players=players)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
+        return flask.render_template('fbplayer.html', players=players)
 
 @FRONTEND.route('/fbteam.html')
 def fb_team():
@@ -360,8 +449,11 @@ def fb_team():
 
     """
 
-    teams = DB_MANAGER.get_all_fb_teams()
-    return flask.render_template('fbteam.html', teams=teams)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        teams = DB_MANAGER.get_all_fb_teams()
+        return flask.render_template('fbteam.html', teams=teams)
 
 @FRONTEND.route('/fbresult.html')
 def fb_result():
@@ -372,8 +464,11 @@ def fb_result():
 
     """
 
-    results = DB_MANAGER.get_all_fbresults()
-    return flask.render_template('fbresult.html', results=results)
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        results = DB_MANAGER.get_all_fbresults()
+        return flask.render_template('fbresult.html', results=results)
 
 @FRONTEND.route('/fbstat.html')
 def fb_stat():
@@ -384,7 +479,10 @@ def fb_stat():
 
     """
 
-    return flask.render_template('fbstat.html')
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        return flask.render_template('fbstat.html')
 
 @FRONTEND.route('/addppplayer.html', methods=['GET', 'POST'])
 def add_ppplayer():
@@ -395,29 +493,32 @@ def add_ppplayer():
 
     """
 
-    if flask.request.method == 'POST':
-        first_name = flask.request.form['first_name'].encode('utf-8')
-        last_name = flask.request.form['last_name'].encode('utf-8')
-        nickname = flask.request.form['nickname'].encode('utf-8')
-
-        try:
-            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
-                                  nickname=nickname)
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addppplayer.html', error=error)
-        else:
-            pass
-
-        message = 'Player successfully added'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('ppplayer.html', message=message,
-                                     players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addppplayer.html')
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        if flask.request.method == 'POST':
+            first_name = flask.request.form['first_name'].encode('utf-8')
+            last_name = flask.request.form['last_name'].encode('utf-8')
+            nickname = flask.request.form['nickname'].encode('utf-8')
+
+            try:
+                DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                      nickname=nickname)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addppplayer.html', error=error)
+            else:
+                pass
+
+            message = 'Player successfully added'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('ppplayer.html', message=message,
+                                         players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addppplayer.html')
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addfbplayer.html', methods=['GET', 'POST'])
 def add_fbplayer():
@@ -428,29 +529,32 @@ def add_fbplayer():
 
     """
 
-    if flask.request.method == 'POST':
-        first_name = flask.request.form['first_name'].encode('utf-8')
-        last_name = flask.request.form['last_name'].encode('utf-8')
-        nickname = flask.request.form['nickname'].encode('utf-8')
-
-        try:
-            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
-                                  nickname=nickname)
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addfbplayer.html', error=error)
-        else:
-            pass
-
-        message = 'Player successfully added'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('fbplayer.html', message=message,
-                                     players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addfbplayer.html')
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        if flask.request.method == 'POST':
+            first_name = flask.request.form['first_name'].encode('utf-8')
+            last_name = flask.request.form['last_name'].encode('utf-8')
+            nickname = flask.request.form['nickname'].encode('utf-8')
+
+            try:
+                DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                      nickname=nickname)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addfbplayer.html', error=error)
+            else:
+                pass
+
+            message = 'Player successfully added'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('fbplayer.html', message=message,
+                                         players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addfbplayer.html')
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addmkplayer.html', methods=['GET', 'POST'])
 def add_mkplayer():
@@ -461,29 +565,32 @@ def add_mkplayer():
 
     """
 
-    if flask.request.method == 'POST':
-        first_name = flask.request.form['first_name'].encode('utf-8')
-        last_name = flask.request.form['last_name'].encode('utf-8')
-        nickname = flask.request.form['nickname'].encode('utf-8')
-
-        try:
-            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
-                                  nickname=nickname)
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addmkplayer.html', error=error)
-        else:
-            pass
-
-        message = 'Player successfully added'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('mkplayer.html', message=message,
-                                     players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addmkplayer.html')
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        if flask.request.method == 'POST':
+            first_name = flask.request.form['first_name'].encode('utf-8')
+            last_name = flask.request.form['last_name'].encode('utf-8')
+            nickname = flask.request.form['nickname'].encode('utf-8')
+
+            try:
+                DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                      nickname=nickname)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addmkplayer.html', error=error)
+            else:
+                pass
+
+            message = 'Player successfully added'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('mkplayer.html', message=message,
+                                         players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addmkplayer.html')
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addmpplayer.html', methods=['GET', 'POST'])
 def add_mpplayer():
@@ -494,29 +601,32 @@ def add_mpplayer():
 
     """
 
-    if flask.request.method == 'POST':
-        first_name = flask.request.form['first_name'].encode('utf-8')
-        last_name = flask.request.form['last_name'].encode('utf-8')
-        nickname = flask.request.form['nickname'].encode('utf-8')
-
-        try:
-            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
-                                  nickname=nickname)
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addmpplayer.html', error=error)
-        else:
-            pass
-
-        message = 'Player successfully added'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('mpplayer.html', message=message,
-                                     players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addmpplayer.html')
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        if flask.request.method == 'POST':
+            first_name = flask.request.form['first_name'].encode('utf-8')
+            last_name = flask.request.form['last_name'].encode('utf-8')
+            nickname = flask.request.form['nickname'].encode('utf-8')
+
+            try:
+                DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                      nickname=nickname)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addmpplayer.html', error=error)
+            else:
+                pass
+
+            message = 'Player successfully added'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('mpplayer.html', message=message,
+                                         players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addmpplayer.html')
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addssplayer.html', methods=['GET', 'POST'])
 def add_ssplayer():
@@ -527,29 +637,32 @@ def add_ssplayer():
 
     """
 
-    if flask.request.method == 'POST':
-        first_name = flask.request.form['first_name'].encode('utf-8')
-        last_name = flask.request.form['last_name'].encode('utf-8')
-        nickname = flask.request.form['nickname'].encode('utf-8')
-
-        try:
-            DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
-                                  nickname=nickname)
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addssplayer.html', error=error)
-        else:
-            pass
-
-        message = 'Player successfully added'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('ssplayer.html', message=message,
-                                     players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addssplayer.html')
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        if flask.request.method == 'POST':
+            first_name = flask.request.form['first_name'].encode('utf-8')
+            last_name = flask.request.form['last_name'].encode('utf-8')
+            nickname = flask.request.form['nickname'].encode('utf-8')
+
+            try:
+                DB_MANAGER.add_player(first_name=first_name, last_name=last_name,
+                                      nickname=nickname)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addssplayer.html', error=error)
+            else:
+                pass
+
+            message = 'Player successfully added'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('ssplayer.html', message=message,
+                                         players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addssplayer.html')
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addppresult.html', methods=['GET', 'POST'])
 def add_ppresult():
@@ -560,50 +673,53 @@ def add_ppresult():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        winner = flask.request.form['winner'].encode('utf-8')
-        loser = flask.request.form['loser'].encode('utf-8')
+        if flask.request.method == 'POST':
+            winner = flask.request.form['winner'].encode('utf-8')
+            loser = flask.request.form['loser'].encode('utf-8')
 
-        first_quote = winner.find('"')
-        second_quote = winner.find('"', first_quote + 1)
-        final_winner = (winner[:first_quote - 1],
-                        winner[second_quote + 2:],
-                        winner[first_quote + 1:second_quote])
+            first_quote = winner.find('"')
+            second_quote = winner.find('"', first_quote + 1)
+            final_winner = (winner[:first_quote - 1],
+                            winner[second_quote + 2:],
+                            winner[first_quote + 1:second_quote])
 
-        first_quote = loser.find('"')
-        second_quote = loser.find('"', first_quote + 1)
-        final_loser = (loser[:first_quote - 1],
-                       loser[second_quote + 2:],
-                       loser[first_quote + 1:second_quote])
+            first_quote = loser.find('"')
+            second_quote = loser.find('"', first_quote + 1)
+            final_loser = (loser[:first_quote - 1],
+                           loser[second_quote + 2:],
+                           loser[first_quote + 1:second_quote])
 
-        try:
-            DB_MANAGER.add_ppresult(winner=final_winner, loser=final_loser)
+            try:
+                DB_MANAGER.add_ppresult(winner=final_winner, loser=final_loser)
 
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addppresult.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addppresult.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('addppresult.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('addppresult.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('addppresult.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('addppresult.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Result successfully added'
+            results = DB_MANAGER.get_all_ppresults()
+            return flask.render_template('ppresult.html', message=message,
+                                         results=results)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addppresult.html', players=players)
 
         else:
-            pass
-
-        message = 'Result successfully added'
-        results = DB_MANAGER.get_all_ppresults()
-        return flask.render_template('ppresult.html', message=message,
-                                     results=results)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addppresult.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addfbresult.html', methods=['GET', 'POST'])
 def add_fbresult():
@@ -614,67 +730,70 @@ def add_fbresult():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        offense_winner = flask.request.form['offense_winner'].encode('utf-8')
-        offense_loser = flask.request.form['offense_loser'].encode('utf-8')
-        defense_winner = flask.request.form['defense_winner'].encode('utf-8')
-        defense_loser = flask.request.form['defense_loser'].encode('utf-8')
+        if flask.request.method == 'POST':
+            offense_winner = flask.request.form['offense_winner'].encode('utf-8')
+            offense_loser = flask.request.form['offense_loser'].encode('utf-8')
+            defense_winner = flask.request.form['defense_winner'].encode('utf-8')
+            defense_loser = flask.request.form['defense_loser'].encode('utf-8')
 
-        first_quote = offense_winner.find('"')
-        second_quote = offense_winner.find('"', first_quote + 1)
-        final_offense_winner = (offense_winner[:first_quote - 1],
-            offense_winner[second_quote + 2:],
-            offense_winner[first_quote + 1:second_quote])
+            first_quote = offense_winner.find('"')
+            second_quote = offense_winner.find('"', first_quote + 1)
+            final_offense_winner = (offense_winner[:first_quote - 1],
+                offense_winner[second_quote + 2:],
+                offense_winner[first_quote + 1:second_quote])
 
-        first_quote = offense_loser.find('"')
-        second_quote = offense_loser.find('"', first_quote + 1)
-        final_offense_loser = (offense_loser[:first_quote - 1],
-            offense_loser[second_quote + 2:],
-            offense_loser[first_quote + 1:second_quote])
+            first_quote = offense_loser.find('"')
+            second_quote = offense_loser.find('"', first_quote + 1)
+            final_offense_loser = (offense_loser[:first_quote - 1],
+                offense_loser[second_quote + 2:],
+                offense_loser[first_quote + 1:second_quote])
 
-        first_quote = defense_winner.find('"')
-        second_quote = defense_winner.find('"', first_quote + 1)
-        final_defense_winner = (defense_winner[:first_quote - 1],
-            defense_winner[second_quote + 2:],
-            defense_winner[first_quote + 1:second_quote])
+            first_quote = defense_winner.find('"')
+            second_quote = defense_winner.find('"', first_quote + 1)
+            final_defense_winner = (defense_winner[:first_quote - 1],
+                defense_winner[second_quote + 2:],
+                defense_winner[first_quote + 1:second_quote])
 
-        first_quote = defense_loser.find('"')
-        second_quote = defense_loser.find('"', first_quote + 1)
-        final_defense_loser = (defense_loser[:first_quote - 1],
-            defense_loser[second_quote + 2:],
-            defense_loser[first_quote + 1:second_quote])
+            first_quote = defense_loser.find('"')
+            second_quote = defense_loser.find('"', first_quote + 1)
+            final_defense_loser = (defense_loser[:first_quote - 1],
+                defense_loser[second_quote + 2:],
+                defense_loser[first_quote + 1:second_quote])
 
-        try:
-            DB_MANAGER.add_fbresult(
-                offense_winner=final_offense_winner,
-                defense_winner=final_defense_winner,
-                offense_loser=final_offense_loser,
-                defense_loser=final_defense_loser)
+            try:
+                DB_MANAGER.add_fbresult(
+                    offense_winner=final_offense_winner,
+                    defense_winner=final_defense_winner,
+                    offense_loser=final_offense_loser,
+                    defense_loser=final_defense_loser)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addfbresult.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addfbresult.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('addfbresult.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('addfbresult.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('addfbresult.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('addfbresult.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Result successfully added'
+            results = DB_MANAGER.get_all_fbresults()
+            return flask.render_template('fbresult.html', message=message,
+                                         results=results)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addfbresult.html', players=players)
 
         else:
-            pass
-
-        message = 'Result successfully added'
-        results = DB_MANAGER.get_all_fbresults()
-        return flask.render_template('fbresult.html', message=message,
-                                     results=results)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addfbresult.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addmkresult.html', methods=['GET', 'POST'])
 def add_mkresult():
@@ -685,75 +804,78 @@ def add_mkresult():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-
-    if flask.request.method == 'POST':
-        first_place = flask.request.form['first_place'].encode('utf-8')
-        second_place = flask.request.form['second_place'].encode('utf-8')
-        third_place = flask.request.form['third_place'].encode('utf-8')
-        fourth_place = flask.request.form['fourth_place'].encode('utf-8')
-        course = flask.request.form['course'].encode('utf-8')
-
-        first_quote = first_place.find('"')
-        second_quote = first_place.find('"', first_quote + 1)
-        final_first_place = (first_place[:first_quote - 1],
-            first_place[second_quote + 2:],
-            first_place[first_quote + 1:second_quote])
-
-        first_quote = second_place.find('"')
-        second_quote = second_place.find('"', first_quote + 1)
-        final_second_place = (second_place[:first_quote - 1],
-            second_place[second_quote + 2:],
-            second_place[first_quote + 1:second_quote])
-
-        if third_place == "N/A":
-            final_third_place = False
-        else:
-            first_quote = third_place.find('"')
-            second_quote = third_place.find('"', first_quote + 1)
-            final_third_place = (third_place[:first_quote - 1],
-                third_place[second_quote + 2:],
-                third_place[first_quote + 1:second_quote])
-
-        if fourth_place == "N/A":
-            final_fourth_place = False
-        else:
-            first_quote = fourth_place.find('"')
-            second_quote = fourth_place.find('"', first_quote + 1)
-            final_fourth_place = (fourth_place[:first_quote - 1],
-                fourth_place[second_quote + 2:],
-                fourth_place[first_quote + 1:second_quote])
-
-        try:
-            DB_MANAGER.add_mkresult(
-                first=final_first_place,
-                second=final_second_place,
-                third=final_third_place,
-                fourth=final_fourth_place,
-                course=course)
-
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addmkresult.html', error=error, players=players)
-
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('addmkresult.html', error=error, players=players)
-
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('addmkresult.html', error=error, players=players)
-
-        else:
-            pass
-
-        message = 'Result successfully added'
-        results = DB_MANAGER.get_all_mkresults()
-        return flask.render_template('mkresult.html', message=message,
-                                     results=results)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addmkresult.html', players=players)
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        players = DB_MANAGER.get_all_players()
+
+        if flask.request.method == 'POST':
+            first_place = flask.request.form['first_place'].encode('utf-8')
+            second_place = flask.request.form['second_place'].encode('utf-8')
+            third_place = flask.request.form['third_place'].encode('utf-8')
+            fourth_place = flask.request.form['fourth_place'].encode('utf-8')
+            course = flask.request.form['course'].encode('utf-8')
+
+            first_quote = first_place.find('"')
+            second_quote = first_place.find('"', first_quote + 1)
+            final_first_place = (first_place[:first_quote - 1],
+                first_place[second_quote + 2:],
+                first_place[first_quote + 1:second_quote])
+
+            first_quote = second_place.find('"')
+            second_quote = second_place.find('"', first_quote + 1)
+            final_second_place = (second_place[:first_quote - 1],
+                second_place[second_quote + 2:],
+                second_place[first_quote + 1:second_quote])
+
+            if third_place == "N/A":
+                final_third_place = False
+            else:
+                first_quote = third_place.find('"')
+                second_quote = third_place.find('"', first_quote + 1)
+                final_third_place = (third_place[:first_quote - 1],
+                    third_place[second_quote + 2:],
+                    third_place[first_quote + 1:second_quote])
+
+            if fourth_place == "N/A":
+                final_fourth_place = False
+            else:
+                first_quote = fourth_place.find('"')
+                second_quote = fourth_place.find('"', first_quote + 1)
+                final_fourth_place = (fourth_place[:first_quote - 1],
+                    fourth_place[second_quote + 2:],
+                    fourth_place[first_quote + 1:second_quote])
+
+            try:
+                DB_MANAGER.add_mkresult(
+                    first=final_first_place,
+                    second=final_second_place,
+                    third=final_third_place,
+                    fourth=final_fourth_place,
+                    course=course)
+
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addmkresult.html', error=error, players=players)
+
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('addmkresult.html', error=error, players=players)
+
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('addmkresult.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Result successfully added'
+            results = DB_MANAGER.get_all_mkresults()
+            return flask.render_template('mkresult.html', message=message,
+                                         results=results)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addmkresult.html', players=players)
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addssresult.html', methods=['GET', 'POST'])
 def add_ssresult():
@@ -764,145 +886,148 @@ def add_ssresult():
 
     """
 
-    players = DB_MANAGER.get_all_players()
-
-    if flask.request.method == 'POST':
-        first_place = flask.request.form['first_place'].encode('utf-8')
-        char_first_place = flask.request.form['char_first_place'].encode('utf-8')
-        second_place = flask.request.form['second_place'].encode('utf-8')
-        char_second_place = flask.request.form['char_second_place'].encode('utf-8')
-        third_place = flask.request.form['third_place'].encode('utf-8')
-        char_third_place = flask.request.form['char_third_place'].encode('utf-8')
-        fourth_place = flask.request.form['fourth_place'].encode('utf-8')
-        char_fourth_place = flask.request.form['char_fourth_place'].encode('utf-8')
-        fifth_place = flask.request.form['fifth_place'].encode('utf-8')
-        char_fifth_place = flask.request.form['char_fifth_place'].encode('utf-8')
-        sixth_place = flask.request.form['sixth_place'].encode('utf-8')
-        char_sixth_place = flask.request.form['char_sixth_place'].encode('utf-8')
-        seventh_place = flask.request.form['seventh_place'].encode('utf-8')
-        char_seventh_place = flask.request.form['char_seventh_place'].encode('utf-8')
-        eighth_place = flask.request.form['eighth_place'].encode('utf-8')
-        char_eighth_place = flask.request.form['char_eighth_place'].encode('utf-8')
-
-        first_quote = first_place.find('"')
-        second_quote = first_place.find('"', first_quote + 1)
-        final_first_place = (first_place[:first_quote - 1],
-            first_place[second_quote + 2:],
-            first_place[first_quote + 1:second_quote])
-
-        first_quote = second_place.find('"')
-        second_quote = second_place.find('"', first_quote + 1)
-        final_second_place = (second_place[:first_quote - 1],
-            second_place[second_quote + 2:],
-            second_place[first_quote + 1:second_quote])
-
-        if third_place == "N/A":
-            final_third_place = False
-        else:
-            first_quote = third_place.find('"')
-            second_quote = third_place.find('"', first_quote + 1)
-            final_third_place = (third_place[:first_quote - 1],
-                third_place[second_quote + 2:],
-                third_place[first_quote + 1:second_quote])
-        if char_third_place == "N/A":
-            char_third_place = False
-
-        if fourth_place == "N/A":
-            final_fourth_place = False
-        else:
-            first_quote = fourth_place.find('"')
-            second_quote = fourth_place.find('"', first_quote + 1)
-            final_fourth_place = (fourth_place[:first_quote - 1],
-                fourth_place[second_quote + 2:],
-                fourth_place[first_quote + 1:second_quote])
-        if char_fourth_place == "N/A":
-            char_fourth_place = False
-
-        if fifth_place == "N/A":
-            final_fifth_place = False
-        else:
-            first_quote = fifth_place.find('"')
-            second_quote = fifth_place.find('"', first_quote + 1)
-            final_fifth_place = (fifth_place[:first_quote - 1],
-                fifth_place[second_quote + 2:],
-                fifth_place[first_quote + 1:second_quote])
-        if char_fifth_place == "N/A":
-            char_fifth_place = False
-
-        if sixth_place == "N/A":
-            final_sixth_place = False
-        else:
-            first_quote = sixth_place.find('"')
-            second_quote = sixth_place.find('"', first_quote + 1)
-            final_sixth_place = (sixth_place[:first_quote - 1],
-                sixth_place[second_quote + 2:],
-                sixth_place[first_quote + 1:second_quote])
-        if char_sixth_place == "N/A":
-            char_sixth_place = False
-
-        if seventh_place == "N/A":
-            final_seventh_place = False
-        else:
-            first_quote = seventh_place.find('"')
-            second_quote = seventh_place.find('"', first_quote + 1)
-            final_seventh_place = (seventh_place[:first_quote - 1],
-                seventh_place[second_quote + 2:],
-                seventh_place[first_quote + 1:second_quote])
-        if char_seventh_place == "N/A":
-            char_seventh_place = False
-
-        if eighth_place == "N/A":
-            final_eighth_place = False
-        else:
-            first_quote = eighth_place.find('"')
-            second_quote = eighth_place.find('"', first_quote + 1)
-            final_eighth_place = (eighth_place[:first_quote - 1],
-                eighth_place[second_quote + 2:],
-                eighth_place[first_quote + 1:second_quote])
-        if char_eighth_place == "N/A":
-            char_eighth_place = False
-
-        try:
-            DB_MANAGER.add_ssresult(
-                first=final_first_place,
-                char_first=char_first_place,
-                second=final_second_place,
-                char_second=char_second_place,
-                third=final_third_place,
-                char_third=char_third_place,
-                fourth=final_fourth_place,
-                char_fourth=char_fourth_place,
-                fifth=final_fifth_place,
-                char_fifth=char_fifth_place,
-                sixth=final_sixth_place,
-                char_sixth=char_sixth_place,
-                seventh=final_seventh_place,
-                char_seventh=char_seventh_place,
-                eighth=final_eighth_place,
-                char_eighth=char_eighth_place)
-
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addssresult.html', error=error, players=players)
-
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('addssresult.html', error=error, players=players)
-
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('addssresult.html', error=error, players=players)
-
-        else:
-            pass
-
-        message = 'Result successfully added'
-        results = DB_MANAGER.get_all_ssresults()
-        return flask.render_template('ssresult.html', message=message,
-                                     results=results)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addssresult.html', players=players)
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+        players = DB_MANAGER.get_all_players()
+
+        if flask.request.method == 'POST':
+            first_place = flask.request.form['first_place'].encode('utf-8')
+            char_first_place = flask.request.form['char_first_place'].encode('utf-8')
+            second_place = flask.request.form['second_place'].encode('utf-8')
+            char_second_place = flask.request.form['char_second_place'].encode('utf-8')
+            third_place = flask.request.form['third_place'].encode('utf-8')
+            char_third_place = flask.request.form['char_third_place'].encode('utf-8')
+            fourth_place = flask.request.form['fourth_place'].encode('utf-8')
+            char_fourth_place = flask.request.form['char_fourth_place'].encode('utf-8')
+            fifth_place = flask.request.form['fifth_place'].encode('utf-8')
+            char_fifth_place = flask.request.form['char_fifth_place'].encode('utf-8')
+            sixth_place = flask.request.form['sixth_place'].encode('utf-8')
+            char_sixth_place = flask.request.form['char_sixth_place'].encode('utf-8')
+            seventh_place = flask.request.form['seventh_place'].encode('utf-8')
+            char_seventh_place = flask.request.form['char_seventh_place'].encode('utf-8')
+            eighth_place = flask.request.form['eighth_place'].encode('utf-8')
+            char_eighth_place = flask.request.form['char_eighth_place'].encode('utf-8')
+
+            first_quote = first_place.find('"')
+            second_quote = first_place.find('"', first_quote + 1)
+            final_first_place = (first_place[:first_quote - 1],
+                first_place[second_quote + 2:],
+                first_place[first_quote + 1:second_quote])
+
+            first_quote = second_place.find('"')
+            second_quote = second_place.find('"', first_quote + 1)
+            final_second_place = (second_place[:first_quote - 1],
+                second_place[second_quote + 2:],
+                second_place[first_quote + 1:second_quote])
+
+            if third_place == "N/A":
+                final_third_place = False
+            else:
+                first_quote = third_place.find('"')
+                second_quote = third_place.find('"', first_quote + 1)
+                final_third_place = (third_place[:first_quote - 1],
+                    third_place[second_quote + 2:],
+                    third_place[first_quote + 1:second_quote])
+            if char_third_place == "N/A":
+                char_third_place = False
+
+            if fourth_place == "N/A":
+                final_fourth_place = False
+            else:
+                first_quote = fourth_place.find('"')
+                second_quote = fourth_place.find('"', first_quote + 1)
+                final_fourth_place = (fourth_place[:first_quote - 1],
+                    fourth_place[second_quote + 2:],
+                    fourth_place[first_quote + 1:second_quote])
+            if char_fourth_place == "N/A":
+                char_fourth_place = False
+
+            if fifth_place == "N/A":
+                final_fifth_place = False
+            else:
+                first_quote = fifth_place.find('"')
+                second_quote = fifth_place.find('"', first_quote + 1)
+                final_fifth_place = (fifth_place[:first_quote - 1],
+                    fifth_place[second_quote + 2:],
+                    fifth_place[first_quote + 1:second_quote])
+            if char_fifth_place == "N/A":
+                char_fifth_place = False
+
+            if sixth_place == "N/A":
+                final_sixth_place = False
+            else:
+                first_quote = sixth_place.find('"')
+                second_quote = sixth_place.find('"', first_quote + 1)
+                final_sixth_place = (sixth_place[:first_quote - 1],
+                    sixth_place[second_quote + 2:],
+                    sixth_place[first_quote + 1:second_quote])
+            if char_sixth_place == "N/A":
+                char_sixth_place = False
+
+            if seventh_place == "N/A":
+                final_seventh_place = False
+            else:
+                first_quote = seventh_place.find('"')
+                second_quote = seventh_place.find('"', first_quote + 1)
+                final_seventh_place = (seventh_place[:first_quote - 1],
+                    seventh_place[second_quote + 2:],
+                    seventh_place[first_quote + 1:second_quote])
+            if char_seventh_place == "N/A":
+                char_seventh_place = False
+
+            if eighth_place == "N/A":
+                final_eighth_place = False
+            else:
+                first_quote = eighth_place.find('"')
+                second_quote = eighth_place.find('"', first_quote + 1)
+                final_eighth_place = (eighth_place[:first_quote - 1],
+                    eighth_place[second_quote + 2:],
+                    eighth_place[first_quote + 1:second_quote])
+            if char_eighth_place == "N/A":
+                char_eighth_place = False
+
+            try:
+                DB_MANAGER.add_ssresult(
+                    first=final_first_place,
+                    char_first=char_first_place,
+                    second=final_second_place,
+                    char_second=char_second_place,
+                    third=final_third_place,
+                    char_third=char_third_place,
+                    fourth=final_fourth_place,
+                    char_fourth=char_fourth_place,
+                    fifth=final_fifth_place,
+                    char_fifth=char_fifth_place,
+                    sixth=final_sixth_place,
+                    char_sixth=char_sixth_place,
+                    seventh=final_seventh_place,
+                    char_seventh=char_seventh_place,
+                    eighth=final_eighth_place,
+                    char_eighth=char_eighth_place)
+
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addssresult.html', error=error, players=players)
+
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('addssresult.html', error=error, players=players)
+
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('addssresult.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Result successfully added'
+            results = DB_MANAGER.get_all_ssresults()
+            return flask.render_template('ssresult.html', message=message,
+                                         results=results)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addssresult.html', players=players)
+
+        else:
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/delppresult.html')
 def del_ppresult():
@@ -913,27 +1038,30 @@ def del_ppresult():
 
     """
 
-    results = DB_MANAGER.get_all_ppresults()
-
-    try:
-        DB_MANAGER.delete_last_ppresult()
-
-    except elo_frontend.DBValueError as error:
-        return flask.render_template('ppresult.html', error=error, results=results)
-
-    except elo_frontend.DBConnectionError as error:
-        return flask.render_template('ppresult.html', error=error, results=results)
-
-    except elo_frontend.DBSyntaxError as error:
-        return flask.render_template('ppresult.html', error=error, results=results)
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        pass
+        results = DB_MANAGER.get_all_ppresults()
 
-    message = 'Result successfully deleted'
-    results = DB_MANAGER.get_all_ppresults()
-    return flask.render_template('ppresult.html', message=message,
-                                 results=results)
+        try:
+            DB_MANAGER.delete_last_ppresult()
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('ppresult.html', error=error, results=results)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('ppresult.html', error=error, results=results)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('ppresult.html', error=error, results=results)
+
+        else:
+            pass
+
+        message = 'Result successfully deleted'
+        results = DB_MANAGER.get_all_ppresults()
+        return flask.render_template('ppresult.html', message=message,
+                                     results=results)
 
 @FRONTEND.route('/delfbresult.html')
 def del_fbresult():
@@ -944,27 +1072,30 @@ def del_fbresult():
 
     """
 
-    results = DB_MANAGER.get_all_fbresults()
-
-    try:
-        DB_MANAGER.delete_last_fbresult()
-
-    except elo_frontend.DBValueError as error:
-        return flask.render_template('fbresult.html', error=error, results=results)
-
-    except elo_frontend.DBConnectionError as error:
-        return flask.render_template('fbresult.html', error=error, results=results)
-
-    except elo_frontend.DBSyntaxError as error:
-        return flask.render_template('fbresult.html', error=error, results=results)
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        pass
+        results = DB_MANAGER.get_all_fbresults()
 
-    message = 'Result successfully deleted'
-    results = DB_MANAGER.get_all_fbresults()
-    return flask.render_template('fbresult.html', message=message,
-                                 results=results)
+        try:
+            DB_MANAGER.delete_last_fbresult()
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('fbresult.html', error=error, results=results)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('fbresult.html', error=error, results=results)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('fbresult.html', error=error, results=results)
+
+        else:
+            pass
+
+        message = 'Result successfully deleted'
+        results = DB_MANAGER.get_all_fbresults()
+        return flask.render_template('fbresult.html', message=message,
+                                     results=results)
 
 @FRONTEND.route('/delmkresult.html')
 def del_mkresult():
@@ -975,27 +1106,30 @@ def del_mkresult():
 
     """
 
-    results = DB_MANAGER.get_all_mkresults()
-
-    try:
-        DB_MANAGER.delete_last_mkresult()
-
-    except elo_frontend.DBValueError as error:
-        return flask.render_template('mkresult.html', error=error, results=results)
-
-    except elo_frontend.DBConnectionError as error:
-        return flask.render_template('mkresult.html', error=error, results=results)
-
-    except elo_frontend.DBSyntaxError as error:
-        return flask.render_template('mkresult.html', error=error, results=results)
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        pass
+        results = DB_MANAGER.get_all_mkresults()
 
-    message = 'Result successfully deleted'
-    results = DB_MANAGER.get_all_mkresults()
-    return flask.render_template('mkresult.html', message=message,
-                                 results=results)
+        try:
+            DB_MANAGER.delete_last_mkresult()
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('mkresult.html', error=error, results=results)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('mkresult.html', error=error, results=results)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('mkresult.html', error=error, results=results)
+
+        else:
+            pass
+
+        message = 'Result successfully deleted'
+        results = DB_MANAGER.get_all_mkresults()
+        return flask.render_template('mkresult.html', message=message,
+                                     results=results)
 
 @FRONTEND.route('/delssresult.html')
 def del_ssresult():
@@ -1006,27 +1140,30 @@ def del_ssresult():
 
     """
 
-    results = DB_MANAGER.get_all_ssresults()
-
-    try:
-        DB_MANAGER.delete_last_ssresult()
-
-    except elo_frontend.DBValueError as error:
-        return flask.render_template('ssresult.html', error=error, results=results)
-
-    except elo_frontend.DBConnectionError as error:
-        return flask.render_template('ssresult.html', error=error, results=results)
-
-    except elo_frontend.DBSyntaxError as error:
-        return flask.render_template('ssresult.html', error=error, results=results)
-
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
     else:
-        pass
+        results = DB_MANAGER.get_all_ssresults()
 
-    message = 'Result successfully deleted'
-    results = DB_MANAGER.get_all_ssresults()
-    return flask.render_template('ssresult.html', message=message,
-                                 results=results)
+        try:
+            DB_MANAGER.delete_last_ssresult()
+
+        except elo_frontend.DBValueError as error:
+            return flask.render_template('ssresult.html', error=error, results=results)
+
+        except elo_frontend.DBConnectionError as error:
+            return flask.render_template('ssresult.html', error=error, results=results)
+
+        except elo_frontend.DBSyntaxError as error:
+            return flask.render_template('ssresult.html', error=error, results=results)
+
+        else:
+            pass
+
+        message = 'Result successfully deleted'
+        results = DB_MANAGER.get_all_ssresults()
+        return flask.render_template('ssresult.html', message=message,
+                                     results=results)
 
 @FRONTEND.route('/editppplayer.html', methods=['GET', 'POST'])
 def edit_ppplayer():
@@ -1037,48 +1174,51 @@ def edit_ppplayer():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        previous_player = flask.request.form['previous_player'].encode('utf-8')
+        if flask.request.method == 'POST':
+            previous_player = flask.request.form['previous_player'].encode('utf-8')
 
-        first_quote = previous_player.find('"')
-        second_quote = previous_player.find('"', first_quote + 1)
-        previous_player = (previous_player[:first_quote - 1],
-            previous_player[second_quote + 2:],
-            previous_player[first_quote + 1:second_quote])
+            first_quote = previous_player.find('"')
+            second_quote = previous_player.find('"', first_quote + 1)
+            previous_player = (previous_player[:first_quote - 1],
+                previous_player[second_quote + 2:],
+                previous_player[first_quote + 1:second_quote])
 
-        previous_player = {'previous_first_name': previous_player[0],
-                           'previous_last_name': previous_player[1],
-                           'previous_nickname': previous_player[2]}
-        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
-               'last_name': flask.request.form['last_name'].encode('utf-8'),
-               'nickname': flask.request.form['nickname'].encode('utf-8')}
+            previous_player = {'previous_first_name': previous_player[0],
+                               'previous_last_name': previous_player[1],
+                               'previous_nickname': previous_player[2]}
+            new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+                   'last_name': flask.request.form['last_name'].encode('utf-8'),
+                   'nickname': flask.request.form['nickname'].encode('utf-8')}
 
-        try:
-            DB_MANAGER.edit_player(previous_player, new_player)
+            try:
+                DB_MANAGER.edit_player(previous_player, new_player)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('editppplayer.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('editppplayer.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('editppplayer.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('editppplayer.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('editppplayer.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('editppplayer.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Player successfully edited'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('ppplayer.html', message=message, players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('editppplayer.html', players=players)
 
         else:
-            pass
-
-        message = 'Player successfully edited'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('ppplayer.html', message=message, players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('editppplayer.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/editfbplayer.html', methods=['GET', 'POST'])
 def edit_fbplayer():
@@ -1089,48 +1229,51 @@ def edit_fbplayer():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        previous_player = flask.request.form['previous_player'].encode('utf-8')
+        if flask.request.method == 'POST':
+            previous_player = flask.request.form['previous_player'].encode('utf-8')
 
-        first_quote = previous_player.find('"')
-        second_quote = previous_player.find('"', first_quote + 1)
-        previous_player = (previous_player[:first_quote - 1],
-            previous_player[second_quote + 2:],
-            previous_player[first_quote + 1:second_quote])
+            first_quote = previous_player.find('"')
+            second_quote = previous_player.find('"', first_quote + 1)
+            previous_player = (previous_player[:first_quote - 1],
+                previous_player[second_quote + 2:],
+                previous_player[first_quote + 1:second_quote])
 
-        previous_player = {'previous_first_name': previous_player[0],
-                           'previous_last_name': previous_player[1],
-                           'previous_nickname': previous_player[2]}
-        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
-               'last_name': flask.request.form['last_name'].encode('utf-8'),
-               'nickname': flask.request.form['nickname'].encode('utf-8')}
+            previous_player = {'previous_first_name': previous_player[0],
+                               'previous_last_name': previous_player[1],
+                               'previous_nickname': previous_player[2]}
+            new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+                   'last_name': flask.request.form['last_name'].encode('utf-8'),
+                   'nickname': flask.request.form['nickname'].encode('utf-8')}
 
-        try:
-            DB_MANAGER.edit_player(previous_player, new_player)
+            try:
+                DB_MANAGER.edit_player(previous_player, new_player)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('editfbplayer.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('editfbplayer.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('editfbplayer.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('editfbplayer.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('editfbplayer.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('editfbplayer.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Player successfully edited'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('fbplayer.html', message=message, players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('editfbplayer.html', players=players)
 
         else:
-            pass
-
-        message = 'Player successfully edited'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('fbplayer.html', message=message, players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('editfbplayer.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/editmkplayer.html', methods=['GET', 'POST'])
 def edit_mkplayer():
@@ -1141,48 +1284,51 @@ def edit_mkplayer():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        previous_player = flask.request.form['previous_player'].encode('utf-8')
+        if flask.request.method == 'POST':
+            previous_player = flask.request.form['previous_player'].encode('utf-8')
 
-        first_quote = previous_player.find('"')
-        second_quote = previous_player.find('"', first_quote + 1)
-        previous_player = (previous_player[:first_quote - 1],
-            previous_player[second_quote + 2:],
-            previous_player[first_quote + 1:second_quote])
+            first_quote = previous_player.find('"')
+            second_quote = previous_player.find('"', first_quote + 1)
+            previous_player = (previous_player[:first_quote - 1],
+                previous_player[second_quote + 2:],
+                previous_player[first_quote + 1:second_quote])
 
-        previous_player = {'previous_first_name': previous_player[0],
-                           'previous_last_name': previous_player[1],
-                           'previous_nickname': previous_player[2]}
-        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
-               'last_name': flask.request.form['last_name'].encode('utf-8'),
-               'nickname': flask.request.form['nickname'].encode('utf-8')}
+            previous_player = {'previous_first_name': previous_player[0],
+                               'previous_last_name': previous_player[1],
+                               'previous_nickname': previous_player[2]}
+            new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+                   'last_name': flask.request.form['last_name'].encode('utf-8'),
+                   'nickname': flask.request.form['nickname'].encode('utf-8')}
 
-        try:
-            DB_MANAGER.edit_player(previous_player, new_player)
+            try:
+                DB_MANAGER.edit_player(previous_player, new_player)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('editmkplayer.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('editmkplayer.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('editmkplayer.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('editmkplayer.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('editmkplayer.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('editmkplayer.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Player successfully edited'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('mkplayer.html', message=message, players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('editmkplayer.html', players=players)
 
         else:
-            pass
-
-        message = 'Player successfully edited'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('mkplayer.html', message=message, players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('editmkplayer.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/editmpplayer.html', methods=['GET', 'POST'])
 def edit_mpplayer():
@@ -1193,48 +1339,51 @@ def edit_mpplayer():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        previous_player = flask.request.form['previous_player'].encode('utf-8')
+        if flask.request.method == 'POST':
+            previous_player = flask.request.form['previous_player'].encode('utf-8')
 
-        first_quote = previous_player.find('"')
-        second_quote = previous_player.find('"', first_quote + 1)
-        previous_player = (previous_player[:first_quote - 1],
-            previous_player[second_quote + 2:],
-            previous_player[first_quote + 1:second_quote])
+            first_quote = previous_player.find('"')
+            second_quote = previous_player.find('"', first_quote + 1)
+            previous_player = (previous_player[:first_quote - 1],
+                previous_player[second_quote + 2:],
+                previous_player[first_quote + 1:second_quote])
 
-        previous_player = {'previous_first_name': previous_player[0],
-                           'previous_last_name': previous_player[1],
-                           'previous_nickname': previous_player[2]}
-        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
-               'last_name': flask.request.form['last_name'].encode('utf-8'),
-               'nickname': flask.request.form['nickname'].encode('utf-8')}
+            previous_player = {'previous_first_name': previous_player[0],
+                               'previous_last_name': previous_player[1],
+                               'previous_nickname': previous_player[2]}
+            new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+                   'last_name': flask.request.form['last_name'].encode('utf-8'),
+                   'nickname': flask.request.form['nickname'].encode('utf-8')}
 
-        try:
-            DB_MANAGER.edit_player(previous_player, new_player)
+            try:
+                DB_MANAGER.edit_player(previous_player, new_player)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('editmpplayer.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('editmpplayer.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('editmpplayer.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('editmpplayer.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('editmpplayer.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('editmpplayer.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Player successfully edited'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('mpplayer.html', message=message, players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('editmpplayer.html', players=players)
 
         else:
-            pass
-
-        message = 'Player successfully edited'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('mpplayer.html', message=message, players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('editmpplayer.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/editssplayer.html', methods=['GET', 'POST'])
 def edit_ssplayer():
@@ -1245,48 +1394,51 @@ def edit_ssplayer():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        previous_player = flask.request.form['previous_player'].encode('utf-8')
+        if flask.request.method == 'POST':
+            previous_player = flask.request.form['previous_player'].encode('utf-8')
 
-        first_quote = previous_player.find('"')
-        second_quote = previous_player.find('"', first_quote + 1)
-        previous_player = (previous_player[:first_quote - 1],
-            previous_player[second_quote + 2:],
-            previous_player[first_quote + 1:second_quote])
+            first_quote = previous_player.find('"')
+            second_quote = previous_player.find('"', first_quote + 1)
+            previous_player = (previous_player[:first_quote - 1],
+                previous_player[second_quote + 2:],
+                previous_player[first_quote + 1:second_quote])
 
-        previous_player = {'previous_first_name': previous_player[0],
-                           'previous_last_name': previous_player[1],
-                           'previous_nickname': previous_player[2]}
-        new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
-               'last_name': flask.request.form['last_name'].encode('utf-8'),
-               'nickname': flask.request.form['nickname'].encode('utf-8')}
+            previous_player = {'previous_first_name': previous_player[0],
+                               'previous_last_name': previous_player[1],
+                               'previous_nickname': previous_player[2]}
+            new_player = {'first_name': flask.request.form['first_name'].encode('utf-8'),
+                   'last_name': flask.request.form['last_name'].encode('utf-8'),
+                   'nickname': flask.request.form['nickname'].encode('utf-8')}
 
-        try:
-            DB_MANAGER.edit_player(previous_player, new_player)
+            try:
+                DB_MANAGER.edit_player(previous_player, new_player)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('editssplayer.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('editssplayer.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('editssplayer.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('editssplayer.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('editssplayer.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('editssplayer.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Player successfully edited'
+            players = DB_MANAGER.get_all_players()
+            return flask.render_template('ssplayer.html', message=message, players=players)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('editssplayer.html', players=players)
 
         else:
-            pass
-
-        message = 'Player successfully edited'
-        players = DB_MANAGER.get_all_players()
-        return flask.render_template('ssplayer.html', message=message, players=players)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('editssplayer.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/addfbteam.html', methods=['GET', 'POST'])
 def add_fbteam():
@@ -1297,50 +1449,53 @@ def add_fbteam():
 
     """
 
-    players = DB_MANAGER.get_all_players()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        players = DB_MANAGER.get_all_players()
 
-    if flask.request.method == 'POST':
-        team_name = flask.request.form['team_name'].encode('utf-8')
-        member_one = flask.request.form['member_one'].encode('utf-8')
-        member_two = flask.request.form['member_two'].encode('utf-8')
+        if flask.request.method == 'POST':
+            team_name = flask.request.form['team_name'].encode('utf-8')
+            member_one = flask.request.form['member_one'].encode('utf-8')
+            member_two = flask.request.form['member_two'].encode('utf-8')
 
-        first_quote = member_one.find('"')
-        second_quote = member_one.find('"', first_quote + 1)
-        final_member_one = (member_one[:first_quote - 1],
-            member_one[second_quote + 2:],
-            member_one[first_quote + 1:second_quote])
+            first_quote = member_one.find('"')
+            second_quote = member_one.find('"', first_quote + 1)
+            final_member_one = (member_one[:first_quote - 1],
+                member_one[second_quote + 2:],
+                member_one[first_quote + 1:second_quote])
 
-        first_quote = member_two.find('"')
-        second_quote = member_two.find('"', first_quote + 1)
-        final_member_two = (member_two[:first_quote - 1],
-            member_two[second_quote + 2:],
-            member_two[first_quote + 1:second_quote])
+            first_quote = member_two.find('"')
+            second_quote = member_two.find('"', first_quote + 1)
+            final_member_two = (member_two[:first_quote - 1],
+                member_two[second_quote + 2:],
+                member_two[first_quote + 1:second_quote])
 
-        try:
-            DB_MANAGER.add_fb_team(team_name=team_name,
-                member_one=final_member_one, member_two=final_member_two)
+            try:
+                DB_MANAGER.add_fb_team(team_name=team_name,
+                    member_one=final_member_one, member_two=final_member_two)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('addfbteam.html', error=error, players=players)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('addfbteam.html', error=error, players=players)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('addfbteam.html', error=error, players=players)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('addfbteam.html', error=error, players=players)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('addfbteam.html', error=error, players=players)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('addfbteam.html', error=error, players=players)
+
+            else:
+                pass
+
+            message = 'Team successfully added'
+            teams = DB_MANAGER.get_all_fb_teams()
+            return flask.render_template('fbteam.html', message=message, teams=teams)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('addfbteam.html', players=players)
 
         else:
-            pass
-
-        message = 'Team successfully added'
-        teams = DB_MANAGER.get_all_fb_teams()
-        return flask.render_template('fbteam.html', message=message, teams=teams)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('addfbteam.html', players=players)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 @FRONTEND.route('/editfbteam.html', methods=['GET', 'POST'])
 def edit_fbteam():
@@ -1351,36 +1506,39 @@ def edit_fbteam():
 
     """
 
-    teams = DB_MANAGER.get_all_fb_teams()
+    if not flask.session.get('logged_in'):
+        return render_template('login.html')
+    else:
+        teams = DB_MANAGER.get_all_fb_teams()
 
-    if flask.request.method == 'POST':
-        previous_team = flask.request.form['previous_team'].encode('utf-8')
-        new_team = flask.request.form['new_team'].encode('utf-8')
+        if flask.request.method == 'POST':
+            previous_team = flask.request.form['previous_team'].encode('utf-8')
+            new_team = flask.request.form['new_team'].encode('utf-8')
 
-        try:
-            DB_MANAGER.edit_team(previous_team, new_team)
+            try:
+                DB_MANAGER.edit_team(previous_team, new_team)
 
-        except elo_frontend.DBValueError as error:
-            return flask.render_template('editfbteam.html', error=error, teams=teams)
+            except elo_frontend.DBValueError as error:
+                return flask.render_template('editfbteam.html', error=error, teams=teams)
 
-        except elo_frontend.DBConnectionError as error:
-            return flask.render_template('editfbteam.html', error=error, teams=teams)
+            except elo_frontend.DBConnectionError as error:
+                return flask.render_template('editfbteam.html', error=error, teams=teams)
 
-        except elo_frontend.DBSyntaxError as error:
-            return flask.render_template('editfbteam.html', error=error, teams=teams)
+            except elo_frontend.DBSyntaxError as error:
+                return flask.render_template('editfbteam.html', error=error, teams=teams)
+
+            else:
+                pass
+
+            message = 'Team successfully edited'
+            teams = DB_MANAGER.get_all_fb_teams()
+            return flask.render_template('fbteam.html', message=message, teams=teams)
+
+        elif flask.request.method == 'GET':
+            return flask.render_template('editfbteam.html', teams=teams)
 
         else:
-            pass
-
-        message = 'Team successfully edited'
-        teams = DB_MANAGER.get_all_fb_teams()
-        return flask.render_template('fbteam.html', message=message, teams=teams)
-
-    elif flask.request.method == 'GET':
-        return flask.render_template('editfbteam.html', teams=teams)
-
-    else:
-        raise elo_frontend.HTTPError("Received unrecognized HTTP method")
+            raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
 def setup_argparser():
     """ Creates Elo Frontend argument parser
