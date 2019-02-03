@@ -26,17 +26,19 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-4 ml-auto mr-auto">
-                            <div class="card card-register">
-                                <h3 class="title">Welcome</h3>
-                                <div class="form-group has-label">
-                                    <label for="username">Username</label>
-                                    <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+                            <form action="{{ url_for('login') }}" method="POST" class="form">
+                                <div class="card card-register">
+                                    <h3 class="title">Welcome</h3>
+                                    <div class="form-group has-label">
+                                        <label for="username">Username</label>
+                                        <input type="text" class="form-control" id="username" name="username" placeholder="Username">
 
-                                    <label for="password">Password</label>
-                                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-                                    <button type="submit" class="btn btn-danger btn-block btn-round">Login</button>
+                                        <label for="password">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                                        <button type="submit" class="btn btn-danger btn-block btn-round">Login</button>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
 					<div class="footer register-footer text-center">
