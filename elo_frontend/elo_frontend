@@ -110,6 +110,18 @@ def login():
     else:
         raise elo_frontend.HTTPError("Received unrecognized HTTP method")
 
+@FRONTEND.route('/logout.html')
+def logout():
+    """Logout page
+
+    Returns:
+        displays login page
+
+    """
+
+    flask.session['logged_in'] = False
+    return flask.render_template('login.html')
+
 @FRONTEND.route('/mk.html')
 def mk_home():
     """Mario Kart home page
