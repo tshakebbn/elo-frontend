@@ -1603,7 +1603,7 @@ def main():
 
     try:
         FRONTEND.secret_key = os.urandom(12)
-        FRONTEND.run(debug=True, port=config.get('options', 'port'), host=config.get('options', 'host'))
+        FRONTEND.run(port=config.get('options', 'port'), host=config.get('options', 'host'))
     except ConfigParser.NoSectionError:
         traceback.print_exc()
         sys.exit("Aborting. Missing section in config file")
